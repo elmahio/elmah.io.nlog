@@ -14,6 +14,7 @@
     <description>elmah.io target for NLog</description>
     <projectUrl>https://github.com/elmahio/elmah.io.nlog</projectUrl>
     <iconUrl>https://secure.gravatar.com/avatar/5c4cb3646528821117abde6d2d5ee22d?s=32</iconUrl>
+	<tags>Error Exception Reporing Management Logging ELMAH Diagnostics Tracing NLog</tags>
   </metadata>
   <files>
     <file src="bin\$Configuration$\Elmah.Io.NLog.dll" target="lib\net40\Elmah.Io.NLog.dll" />

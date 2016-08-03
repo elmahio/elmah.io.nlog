@@ -1,4 +1,8 @@
 # elmah.io.nlog
+
+[![Build status](https://ci.appveyor.com/api/projects/status/gdgwwlu1j8yh7esl?svg=true)](https://ci.appveyor.com/project/ThomasArdal/elmah-io-nlog)
+[![NuGet](https://img.shields.io/nuget/vpre/elmah.io.nlog.svg)](https://www.nuget.org/packages/elmah.io.nlog)
+
 Log to elmah.io from Nlog.
 
 ## Installation

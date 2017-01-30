@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using Elmah.Io.Client;
+using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
-using ILogger = Elmah.Io.Client.ILogger;
-using Logger = Elmah.Io.Client.Logger;
 
 namespace Elmah.Io.NLog
 {
     [Target("elmah.io")]
     public class ElmahIoTarget : Target
     {
-        private ILogger _logger;
+        private IElmahioAPI _client;
+
+        [RequiredParameter]
+        public string ApiKey { get; set; }
 
         [RequiredParameter]
         public Guid LogId { get; set; }
@@ -22,27 +24,28 @@ namespace Elmah.Io.NLog
         {
         }
 
-        public ElmahIoTarget(ILogger logger)
+        public ElmahIoTarget(IElmahioAPI client)
         {
-            _logger = logger;
+            _client = client;
         }
 
         protected override void Write(LogEventInfo logEvent)
         {
-            if (_logger == null)
+            if (_client == null)
             {
-                _logger = new Logger(LogId);
+                _client = ElmahioAPI.Create(ApiKey);
             }
 
-            var message = new Message(logEvent.FormattedMessage)
+            var message = new CreateMessage
             {
+                Title = logEvent.FormattedMessage,
                 Severity = LevelToSeverity(logEvent.Level),
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
-                Detail = logEvent.Exception != null ? logEvent.Exception.ToString() : null,
+                Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent.Properties)
             };
 
-            _logger.Log(message);
+            _client.Messages.CreateAndNotify(LogId, message);
         }
 
         private List<Item> PropertiesToData(IDictionary<object, object> properties)
@@ -50,14 +53,14 @@ namespace Elmah.Io.NLog
             return properties.Keys.Select(key => new Item{Key = key.ToString(), Value = properties[key].ToString()}).ToList();
         }
 
-        private Severity? LevelToSeverity(LogLevel level)
+        private string LevelToSeverity(LogLevel level)
         {
-            if (level == LogLevel.Debug) return Severity.Debug;
-            if (level == LogLevel.Error) return Severity.Error;
-            if (level == LogLevel.Fatal) return Severity.Fatal;
-            if (level == LogLevel.Trace) return Severity.Verbose;
-            if (level == LogLevel.Warn) return Severity.Warning;
-            return Severity.Information;
+            if (level == LogLevel.Debug) return Severity.Debug.ToString();
+            if (level == LogLevel.Error) return Severity.Error.ToString();
+            if (level == LogLevel.Fatal) return Severity.Fatal.ToString();
+            if (level == LogLevel.Trace) return Severity.Verbose.ToString();
+            if (level == LogLevel.Warn) return Severity.Warning.ToString();
+            return Severity.Information.ToString();
         }
     }
 }

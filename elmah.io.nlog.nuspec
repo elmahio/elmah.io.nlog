@@ -5,8 +5,8 @@
     <authors>elmah.io</authors>
     <owners />
     <dependencies>
-      <dependency id="NLog" version="4.0.1" />
-      <dependency id="elmah.io.client" version="2.0.24" />
+      <dependency id="NLog" version="4.4.1" />
+      <dependency id="Elmah.Io.Client" version="3.0.41-pre" />
     </dependencies>
     <id>elmah.io.nlog</id>
     <title>elmah.io.nlog</title>
@@ -14,9 +14,9 @@
     <description>elmah.io target for NLog</description>
     <projectUrl>https://github.com/elmahio/elmah.io.nlog</projectUrl>
     <iconUrl>https://secure.gravatar.com/avatar/5c4cb3646528821117abde6d2d5ee22d?s=32</iconUrl>
-	<tags>Error Exception Reporing Management Logging ELMAH Diagnostics Tracing NLog</tags>
+	<tags>Error Exception Reporting Management Logging ELMAH Diagnostics Tracing NLog</tags>
   </metadata>
   <files>
-    <file src="bin\$Configuration$\Elmah.Io.NLog.dll" target="lib\net40\Elmah.Io.NLog.dll" />
+    <file src="Elmah.Io.NLog\bin\$Configuration$\Elmah.Io.NLog.dll" target="lib\net45\Elmah.Io.NLog.dll" />
   </files>
 </package>

@@ -5,6 +5,8 @@ using Elmah.Io.Client;
 using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
+using NLog.LayoutRenderers;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace Elmah.Io.NLog
@@ -48,9 +50,40 @@ namespace Elmah.Io.NLog
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent.Properties),
                 Source = logEvent.LoggerName,
+                User = Identity(logEvent),
+                Hostname = MachineName(logEvent),
+                Url = AspNetRequestUrl(logEvent),
             };
 
             _client.Messages.CreateAndNotify(LogId, message);
+        }
+
+        private string AspNetRequestUrl(LogEventInfo logEvent)
+        {
+            Layout renderer = "${aspnet-request-url:IncludeQueryString=true}";
+            var url = renderer.Render(logEvent);
+            return string.IsNullOrWhiteSpace(url) ? null : url;
+        }
+
+        private string Identity(LogEventInfo logEvent)
+        {
+            Layout aspNetRenderer = "${aspnet-user-identity}";
+            var user = aspNetRenderer.Render(logEvent);
+            if (!string.IsNullOrWhiteSpace(user)) return user;
+
+            var renderer = new IdentityLayoutRenderer
+            {
+                Name = true,
+                AuthType = false,
+                IsAuthenticated = false
+            };
+            user = renderer.Render(logEvent);
+            return string.IsNullOrWhiteSpace(user) ? null : user;
+        }
+
+        private string MachineName(LogEventInfo logEvent)
+        {
+            return new MachineNameLayoutRenderer().Render(logEvent);
         }
 
         private List<Item> PropertiesToData(IDictionary<object, object> properties)

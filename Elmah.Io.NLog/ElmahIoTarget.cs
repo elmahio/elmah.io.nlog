@@ -46,7 +46,8 @@ namespace Elmah.Io.NLog
                 Severity = LevelToSeverity(logEvent.Level),
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
                 Detail = logEvent.Exception?.ToString(),
-                Data = PropertiesToData(logEvent.Properties)
+                Data = PropertiesToData(logEvent.Properties),
+                Source = logEvent.LoggerName,
             };
 
             _client.Messages.CreateAndNotify(LogId, message);

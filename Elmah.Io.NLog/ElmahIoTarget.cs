@@ -55,32 +55,20 @@ namespace Elmah.Io.NLog
                 User = Identity(logEvent),
                 Hostname = MachineName(logEvent),
                 Application = Application,
-                Url = AspNetRequestUrl(logEvent),
             };
 
             _client.Messages.CreateAndNotify(LogId, message);
         }
 
-        private string AspNetRequestUrl(LogEventInfo logEvent)
-        {
-            Layout renderer = "${aspnet-request-url:IncludeQueryString=true}";
-            var url = renderer.Render(logEvent);
-            return string.IsNullOrWhiteSpace(url) ? null : url;
-        }
-
         private string Identity(LogEventInfo logEvent)
         {
-            Layout aspNetRenderer = "${aspnet-user-identity}";
-            var user = aspNetRenderer.Render(logEvent);
-            if (!string.IsNullOrWhiteSpace(user)) return user;
-
             var renderer = new IdentityLayoutRenderer
             {
                 Name = true,
                 AuthType = false,
                 IsAuthenticated = false
             };
-            user = renderer.Render(logEvent);
+            var user = renderer.Render(logEvent);
             return string.IsNullOrWhiteSpace(user) ? null : user;
         }
 

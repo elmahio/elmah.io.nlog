@@ -10,7 +10,7 @@ using NLog.Targets;
 namespace Elmah.Io.NLog
 {
     [Target("elmah.io")]
-    public class ElmahIoTarget : Target
+    public class ElmahIoTarget : TargetWithLayout
     {
         private IElmahioAPI _client;
 
@@ -36,9 +36,13 @@ namespace Elmah.Io.NLog
                 _client = ElmahioAPI.Create(ApiKey);
             }
 
+            var title = Layout != null && Layout.ToString() != "'${longdate}|${level:uppercase=true}|${logger}|${message}'"
+                ? Layout.Render(logEvent)
+                : logEvent.FormattedMessage;
+
             var message = new CreateMessage
             {
-                Title = logEvent.FormattedMessage,
+                Title = title,
                 Severity = LevelToSeverity(logEvent.Level),
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
                 Detail = logEvent.Exception?.ToString(),

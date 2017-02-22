@@ -22,6 +22,8 @@ namespace Elmah.Io.NLog
         [RequiredParameter]
         public Guid LogId { get; set; }
 
+        public string Application { get; set; }
+
         public ElmahIoTarget()
         {
         }
@@ -52,6 +54,7 @@ namespace Elmah.Io.NLog
                 Source = logEvent.LoggerName,
                 User = Identity(logEvent),
                 Hostname = MachineName(logEvent),
+                Application = Application,
                 Url = AspNetRequestUrl(logEvent),
             };
 

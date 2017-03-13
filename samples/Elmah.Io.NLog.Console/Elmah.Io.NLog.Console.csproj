@@ -74,5 +74,11 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Elmah.Io.NLog\Elmah.Io.NLog.csproj">
+      <Project>{e2eb3b81-26c1-4415-90ce-3204bceed5e7}</Project>
+      <Name>Elmah.Io.NLog</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

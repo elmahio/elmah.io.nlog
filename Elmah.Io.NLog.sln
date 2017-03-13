@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.Console", "sa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.Tests", "test\Elmah.Io.NLog.Tests\Elmah.Io.NLog.Tests.csproj", "{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.AspNetCore", "samples\Elmah.Io.NLog.AspNetCore\Elmah.Io.NLog.AspNetCore.csproj", "{C1E18C0E-E81F-4AB2-936F-7537618E5E13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1E18C0E-E81F-4AB2-936F-7537618E5E13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1E18C0E-E81F-4AB2-936F-7537618E5E13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1E18C0E-E81F-4AB2-936F-7537618E5E13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1E18C0E-E81F-4AB2-936F-7537618E5E13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,5 +53,6 @@ Global
 		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7} = {B9551B75-108D-4F94-B607-23E1A34DB497}
 		{0626A469-C514-4FE0-ADDD-013B6D63AED7} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA} = {873FAF29-B362-452A-90EA-19F3FC3AD4CE}
+		{C1E18C0E-E81F-4AB2-936F-7537618E5E13} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 	EndGlobalSection
 EndGlobal

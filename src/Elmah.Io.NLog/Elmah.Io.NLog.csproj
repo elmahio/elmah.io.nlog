@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>elmah.io target for NLog</Description>
+    <Authors>elmah.io</Authors>
+    <TargetFramework>netstandard1.1</TargetFramework>
+    <AssemblyName>Elmah.Io.NLog</AssemblyName>
+    <PackageId>Elmah.Io.NLog</PackageId>
+    <PackageTags>Error;Exception;Reporting;Management;Logging;ELMAH;Diagnostics;Tracing;NLog</PackageTags>
+    <PackageIconUrl>https://secure.gravatar.com/avatar/5c4cb3646528821117abde6d2d5ee22d?s=32</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/elmahio/elmah.io.nlog</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <!--Will be replaced on AppVeyor to build number-->
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Elmah.Io.Client" Version="3.0.41-pre" />
+    <PackageReference Include="NLog" Version="5.0.0-beta06" />
+  </ItemGroup>
+
+</Project>

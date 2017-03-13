@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9551B75-108D-4F94-B607-23E1A34DB497}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{873FAF29-B362-452A-90EA-19F3FC3AD4CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog", "src\Elmah.Io.NLog\Elmah.Io.NLog.csproj", "{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2D2A563-08A0-4B2A-9D31-820045C2357B}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.Console", "samples\Elmah.Io.NLog.Console\Elmah.Io.NLog.Console.csproj", "{0626A469-C514-4FE0-ADDD-013B6D63AED7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.Tests", "test\Elmah.Io.NLog.Tests\Elmah.Io.NLog.Tests.csproj", "{9DFC40D5-4261-4F51-B762-1CCC3726FD90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0626A469-C514-4FE0-ADDD-013B6D63AED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0626A469-C514-4FE0-ADDD-013B6D63AED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0626A469-C514-4FE0-ADDD-013B6D63AED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0626A469-C514-4FE0-ADDD-013B6D63AED7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DFC40D5-4261-4F51-B762-1CCC3726FD90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DFC40D5-4261-4F51-B762-1CCC3726FD90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DFC40D5-4261-4F51-B762-1CCC3726FD90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DFC40D5-4261-4F51-B762-1CCC3726FD90}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E2EB3B81-26C1-4415-90CE-3204BCEED5E7} = {B9551B75-108D-4F94-B607-23E1A34DB497}
+		{0626A469-C514-4FE0-ADDD-013B6D63AED7} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
+		{9DFC40D5-4261-4F51-B762-1CCC3726FD90} = {873FAF29-B362-452A-90EA-19F3FC3AD4CE}
+	EndGlobalSection
+EndGlobal

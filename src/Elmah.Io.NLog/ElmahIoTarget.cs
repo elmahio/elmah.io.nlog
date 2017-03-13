@@ -60,7 +60,10 @@ namespace Elmah.Io.NLog
 
             _client.Messages.CreateAndNotify(LogId, message);
         }
-
+        
+        /// <summary>
+        /// Try to look up current url. If we are not in an HTTP context, this will just return null;
+        /// </summary>
         private string AspNetRequestUrl(LogEventInfo logEvent)
         {
             Layout renderer = "${aspnet-request-url:IncludeQueryString=true}";
@@ -68,20 +71,14 @@ namespace Elmah.Io.NLog
             return string.IsNullOrWhiteSpace(url) ? null : url;
         }
 
+        /// <summary>
+        /// Try to look up the current user identity. If we are not in an HTTP context, this will just return null;
+        /// </summary>
         private string Identity(LogEventInfo logEvent)
         {
             Layout aspNetRenderer = "${aspnet-user-identity}";
             var user = aspNetRenderer.Render(logEvent);
-            if (!string.IsNullOrWhiteSpace(user)) return user;
-
-            var renderer = new IdentityLayoutRenderer
-            {
-                Name = true,
-                AuthType = false,
-                IsAuthenticated = false
-            };
-            user = renderer.Render(logEvent);
-            return string.IsNullOrWhiteSpace(user) ? null : user;
+            return user;
         }
 
         private string MachineName(LogEventInfo logEvent)

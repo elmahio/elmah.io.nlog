@@ -1,11 +1,11 @@
-﻿using System;
-using NLog;
+﻿using NLog;
+using System;
 
 namespace Elmah.Io.NLog.Console
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var log = LogManager.GetCurrentClassLogger();
             log.Debug("This is a debug message");

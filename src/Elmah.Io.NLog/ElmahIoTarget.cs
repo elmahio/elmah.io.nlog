@@ -7,6 +7,7 @@ using NLog;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NLog.LayoutRenderers;
 
 namespace Elmah.Io.NLog
 {
@@ -51,17 +52,38 @@ namespace Elmah.Io.NLog
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent.Properties),
                 Source = logEvent.LoggerName,
-                //Hostname = MachineName(logEvent),
+                Hostname = MachineName(logEvent),
                 Application = Application,
+                User = User(logEvent),
             };
 
             _client.Messages.CreateAndNotify(LogId, message);
         }
 
-        //private string MachineName(LogEventInfo logEvent)
-        //{
-        //    return new MachineNameLayoutRenderer().Render(logEvent);
-        //}
+        private string MachineName(LogEventInfo logEvent)
+        {
+#if NET45
+            return new MachineNameLayoutRenderer().Render(logEvent);
+#else
+            return null;
+#endif
+        }
+
+        private string User(LogEventInfo logEvent)
+        {
+#if NET45
+            var renderer = new IdentityLayoutRenderer
+            {
+                Name = true,
+                AuthType = false,
+                IsAuthenticated = false
+            };
+            var user = renderer.Render(logEvent);
+            return string.IsNullOrWhiteSpace(user) ? null : user;
+#else
+            return null;
+#endif
+        }
 
         private List<Item> PropertiesToData(IDictionary<object, object> properties)
         {

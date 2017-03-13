@@ -5,7 +5,6 @@ using Elmah.Io.Client;
 using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
-using NLog.LayoutRenderers;
 using NLog.Layouts;
 using NLog.Targets;
 
@@ -52,39 +51,17 @@ namespace Elmah.Io.NLog
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent.Properties),
                 Source = logEvent.LoggerName,
-                User = Identity(logEvent),
-                Hostname = MachineName(logEvent),
+                //Hostname = MachineName(logEvent),
                 Application = Application,
-                Url = AspNetRequestUrl(logEvent),
             };
 
             _client.Messages.CreateAndNotify(LogId, message);
         }
-        
-        /// <summary>
-        /// Try to look up current url. If we are not in an HTTP context, this will just return null;
-        /// </summary>
-        private string AspNetRequestUrl(LogEventInfo logEvent)
-        {
-            Layout renderer = "${aspnet-request-url:IncludeQueryString=true}";
-            var url = renderer.Render(logEvent);
-            return string.IsNullOrWhiteSpace(url) ? null : url;
-        }
 
-        /// <summary>
-        /// Try to look up the current user identity. If we are not in an HTTP context, this will just return null;
-        /// </summary>
-        private string Identity(LogEventInfo logEvent)
-        {
-            Layout aspNetRenderer = "${aspnet-user-identity}";
-            var user = aspNetRenderer.Render(logEvent);
-            return user;
-        }
-
-        private string MachineName(LogEventInfo logEvent)
-        {
-            return new MachineNameLayoutRenderer().Render(logEvent);
-        }
+        //private string MachineName(LogEventInfo logEvent)
+        //{
+        //    return new MachineNameLayoutRenderer().Render(logEvent);
+        //}
 
         private List<Item> PropertiesToData(IDictionary<object, object> properties)
         {

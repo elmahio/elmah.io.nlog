@@ -19,8 +19,9 @@ namespace Elmah.Io.NLog
         [RequiredParameter]
         public string ApiKey { get; set; }
 
+        // Needs to be a string and not a guid, in order for .NET core to work
         [RequiredParameter]
-        public Guid LogId { get; set; }
+        public string LogId { get; set; }
 
         public string Application { get; set; }
 
@@ -57,7 +58,7 @@ namespace Elmah.Io.NLog
                 User = User(logEvent),
             };
 
-            _client.Messages.CreateAndNotify(LogId, message);
+            _client.Messages.CreateAndNotify(new Guid(LogId), message);
         }
 
         private string MachineName(LogEventInfo logEvent)

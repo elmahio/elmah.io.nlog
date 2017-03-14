@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,13 +10,14 @@ using NLog.Extensions.Logging;
 using NLog.Web;
 using NLog;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using System.Linq;
+using Elmah.Io.NLog;
 
 namespace Elmah.Io.NLog.AspNetCore
 {
     public class Startup
     {
-		private string _elmahAppKey;
+        private string _elmahAppKey;
         private string _elmahLogId;
 		
         public Startup(IHostingEnvironment env)
@@ -24,7 +28,7 @@ namespace Elmah.Io.NLog.AspNetCore
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 				
-			if (env.IsDevelopment())
+            if (env.IsDevelopment())
             {
                 builder.AddUserSecrets("AspNetCoreElmahUI-c23d2237a4-eb8832a1-452ac5");
             }

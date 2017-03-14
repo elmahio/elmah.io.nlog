@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,8 +7,7 @@ using NLog.Extensions.Logging;
 using NLog.Web;
 using NLog;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
-using Elmah.Io.NLog;
+using Microsoft.Extensions.Logging;
 
 namespace Elmah.Io.NLog.AspNetCore
 {

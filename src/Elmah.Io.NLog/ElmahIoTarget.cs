@@ -63,11 +63,7 @@ namespace Elmah.Io.NLog
 
         private string MachineName(LogEventInfo logEvent)
         {
-#if NET45
             return new MachineNameLayoutRenderer().Render(logEvent);
-#else
-            return null;
-#endif
         }
 
         private string User(LogEventInfo logEvent)
@@ -88,7 +84,15 @@ namespace Elmah.Io.NLog
 
         private List<Item> PropertiesToData(IDictionary<object, object> properties)
         {
-            return properties.Keys.Select(key => new Item{Key = key.ToString(), Value = properties[key].ToString()}).ToList();
+            var items = new List<Item>();
+            foreach (var obj in properties)
+            {
+                if (obj.Value != null)
+                {
+                    items.Add(new Item { Key = obj.Key.ToString(), Value = obj.Value.ToString() });
+                }
+            }
+            return items;
         }
 
         private string LevelToSeverity(LogLevel level)

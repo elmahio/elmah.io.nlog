@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Elmah.Io.Client;
 using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
-using NLog.Layouts;
 using NLog.Targets;
 using NLog.LayoutRenderers;
 

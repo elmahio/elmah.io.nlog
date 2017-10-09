@@ -13,9 +13,6 @@ namespace Elmah.Io.NLog.AspNetCore
 {
     public class Startup
     {
-        private string _elmahAppKey;
-        private string _elmahLogId;
-		
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -39,9 +36,6 @@ namespace Elmah.Io.NLog.AspNetCore
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            _elmahAppKey = Configuration["ElmahAppKey"];
-            _elmahLogId = Configuration["ElmahLogId"];
-
             // Add framework services.
             services.AddMvc();
         }
@@ -51,17 +45,6 @@ namespace Elmah.Io.NLog.AspNetCore
         {
             loggerFactory.AddNLog();
             app.AddNLogWeb();
-
-            LogManager.Configuration.Variables["elmahAppKey"] = _elmahAppKey;
-            LogManager.Configuration.Variables["elmahLogId"] = _elmahLogId;
-
-            foreach (ElmahIoTarget target in LogManager.Configuration.AllTargets.Where(t => t is ElmahIoTarget))
-            {
-                target.ApiKey = _elmahAppKey;
-                target.LogId = _elmahLogId;
-            }
-
-            LogManager.ReconfigExistingLoggers();
 
             if (env.IsDevelopment())
             {

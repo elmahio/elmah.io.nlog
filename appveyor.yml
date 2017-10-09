@@ -1,39 +1,19 @@
 version: 3.1.{build}-pre
+branches:
+  only:
+  - master
 image: Visual Studio 2017
 configuration: Release
-assembly_info:
-  patch: true
-  file: '**\AssemblyInfo.*'
-  assembly_version: '{version}'
-  assembly_file_version: '{version}'
-  assembly_informational_version: '{version}'
 before_build:
-- ps: >-
-    dotnet restore
-
-    Push-Location src\Elmah.Io.NLog
-
-    Write-Host "Setting version to $env:APPVEYOR_BUILD_VERSION"
-
-    (Get-Content Elmah.Io.NLog.csproj).replace("<Version>1.0.0</Version>", "<Version>$env:APPVEYOR_BUILD_VERSION</Version>") | Set-Content Elmah.Io.NLog.csproj
-
-    Pop-Location
+- cmd: dotnet restore
 build:
   verbosity: minimal
-before_package:
-- ps: >-
-    Push-Location test\Elmah.Io.NLog.Tests
-
-    dotnet test
-
-    Pop-Location
 after_build:
-- ps: >-
-    Push-Location src\Elmah.Io.NLog
-
-    dotnet pack --output artifacts
-
-    Pop-Location
+- ps: dotnet pack /p:Version=$env:APPVEYOR_BUILD_VERSION src\Elmah.Io.NLog\Elmah.Io.NLog.csproj --output artifacts
+test:
+  assemblies:
+    only:
+    - test\Elmah.Io.NLog.Tests\bin\**\Elmah.Io.NLog.Tests.dll
 artifacts:
 - path: '**\*.nupkg'
 deploy:

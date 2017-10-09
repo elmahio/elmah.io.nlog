@@ -16,7 +16,6 @@ namespace Elmah.Io.NLog.AspNetCore
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
-                .UseApplicationInsights()
                 .Build();
 
             host.Run();

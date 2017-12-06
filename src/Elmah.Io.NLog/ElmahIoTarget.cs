@@ -14,14 +14,32 @@ namespace Elmah.Io.NLog
     {
         private IElmahioAPI _client;
 
+        private Guid _logId;
+
         [RequiredParameter]
         public string ApiKey { get; set; }
 
         // Needs to be a string and not a guid, in order for .NET core to work
         [RequiredParameter]
-        public string LogId { get; set; }
+        public string LogId
+        {
+            get
+            {
+                return _logId != Guid.Empty ? _logId.ToString() : null;
+            }
+            set
+            {
+                _logId = Guid.Parse(value);
+            }
+        }
 
         public string Application { get; set; }
+
+        private MachineNameLayoutRenderer _machineNameLayoutRenderer;
+
+#if NET45
+        private IdentityLayoutRenderer _identityLayoutRenderer;
+#endif
 
         public ElmahIoTarget()
         {
@@ -56,24 +74,31 @@ namespace Elmah.Io.NLog
                 User = User(logEvent),
             };
 
-            _client.Messages.CreateAndNotify(new Guid(LogId), message);
+            _client.Messages.CreateAndNotify(_logId, message);
         }
 
         private string MachineName(LogEventInfo logEvent)
         {
-            return new MachineNameLayoutRenderer().Render(logEvent);
+            if (_machineNameLayoutRenderer == null)
+            {
+                _machineNameLayoutRenderer = new MachineNameLayoutRenderer();
+            }
+            return _machineNameLayoutRenderer.Render(logEvent);
         }
 
         private string User(LogEventInfo logEvent)
         {
 #if NET45
-            var renderer = new IdentityLayoutRenderer
+            if (_identityLayoutRenderer == null)
             {
-                Name = true,
-                AuthType = false,
-                IsAuthenticated = false
-            };
-            var user = renderer.Render(logEvent);
+                _identityLayoutRenderer = new IdentityLayoutRenderer
+                {
+                    Name = true,
+                    AuthType = false,
+                    IsAuthenticated = false
+                };
+            }
+            var user = _identityLayoutRenderer.Render(logEvent);
             return string.IsNullOrWhiteSpace(user) ? null : user;
 #else
             return null;

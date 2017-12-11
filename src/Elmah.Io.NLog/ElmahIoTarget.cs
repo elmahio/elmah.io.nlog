@@ -67,7 +67,7 @@ namespace Elmah.Io.NLog
                 Severity = LevelToSeverity(logEvent.Level),
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
                 Detail = logEvent.Exception?.ToString(),
-                Data = PropertiesToData(logEvent.Properties),
+                Data = PropertiesToData(logEvent),
                 Source = logEvent.LoggerName,
                 Hostname = MachineName(logEvent),
                 Application = Application,
@@ -105,10 +105,12 @@ namespace Elmah.Io.NLog
 #endif
         }
 
-        private List<Item> PropertiesToData(IDictionary<object, object> properties)
+        private List<Item> PropertiesToData(LogEventInfo logEvent)
         {
+            if (logEvent.Properties == null || logEvent.Properties.Count == 0) return null;
+
             var items = new List<Item>();
-            foreach (var obj in properties)
+            foreach (var obj in logEvent.Properties)
             {
                 if (obj.Value != null)
                 {

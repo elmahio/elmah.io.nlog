@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System;
 using System.Linq;
 
 namespace Elmah.Io.NLog
@@ -8,9 +9,9 @@ namespace Elmah.Io.NLog
         internal static int? Integer(this LogEventInfo logEvent, string name)
         {
             if (logEvent.Properties == null || !logEvent.Properties.Any()) return null;
-            if (!logEvent.Properties.Keys.Any(key => key.ToString().ToLower().Equals(name.ToLower()))) return null;
+            if (!logEvent.Properties.Keys.Any(key => name.Equals(key.ToString(), StringComparison.OrdinalIgnoreCase))) return null;
 
-            var property = logEvent.Properties.First(prop => prop.Key.ToString().ToLower().Equals(name));
+            var property = logEvent.Properties.First(prop => name.Equals(prop.Key.ToString(), StringComparison.OrdinalIgnoreCase));
             var value = property.Value;
             if (value == null) return null;
 
@@ -21,9 +22,9 @@ namespace Elmah.Io.NLog
         internal static string String(this LogEventInfo logEvent, string name)
         {
             if (logEvent.Properties == null || !logEvent.Properties.Any()) return null;
-            if (!logEvent.Properties.Keys.Any(key => key.ToString().ToLower().Equals(name.ToLower()))) return null;
+            if (!logEvent.Properties.Keys.Any(key => name.Equals(key.ToString(), StringComparison.OrdinalIgnoreCase))) return null;
 
-            var property = logEvent.Properties.First(prop => prop.Key.ToString().ToLower().Equals(name));
+            var property = logEvent.Properties.First(prop => name.Equals(prop.Key.ToString(), StringComparison.OrdinalIgnoreCase));
             var value = property.Value;
             if (value == null) return null;
             return value.ToString();

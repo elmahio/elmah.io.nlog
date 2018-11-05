@@ -146,12 +146,12 @@ namespace Elmah.Io.NLog
 
         private string LevelToSeverity(LogLevel level)
         {
-            if (level == LogLevel.Debug) return Severity.Debug.ToString();
-            if (level == LogLevel.Error) return Severity.Error.ToString();
-            if (level == LogLevel.Fatal) return Severity.Fatal.ToString();
-            if (level == LogLevel.Trace) return Severity.Verbose.ToString();
-            if (level == LogLevel.Warn) return Severity.Warning.ToString();
-            return Severity.Information.ToString();
+            if (level == LogLevel.Debug) return nameof(Severity.Debug);
+            if (level == LogLevel.Error) return nameof(Severity.Error);
+            if (level == LogLevel.Fatal) return nameof(Severity.Fatal);
+            if (level == LogLevel.Trace) return nameof(Severity.Verbose);
+            if (level == LogLevel.Warn) return nameof(Severity.Warning);
+            return nameof(Severity.Information);
         }
     }
 }

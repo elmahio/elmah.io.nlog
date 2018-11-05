@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using Elmah.Io.Client;
 using Elmah.Io.Client.Models;
 using Moq;
@@ -11,20 +12,16 @@ namespace Elmah.Io.NLog.Tests
 {
     public class ElmahIoTargetTest
     {
-        [Test]
-        public void CanWrite()
+        Mock<IElmahioAPI> clientMock;
+        Mock<IMessages> messagesMock;
+        Logger logger;
+
+        [SetUp]
+        public void SetUp()
         {
-            // Arrange
-            var clientMock = new Mock<IElmahioAPI>();
-            var messagesMock = new Mock<IMessages>();
+            clientMock = new Mock<IElmahioAPI>();
+            messagesMock = new Mock<IMessages>();
             clientMock.Setup(x => x.Messages).Returns(messagesMock.Object);
-            CreateMessage loggedMessage = null;
-            messagesMock
-                .Setup(x => x.CreateAndNotify(It.IsAny<Guid>(), It.IsAny<CreateMessage>()))
-                .Callback<Guid, CreateMessage>((logId, msg) =>
-                {
-                    loggedMessage = msg;
-                });
             var target = new ElmahIoTarget(clientMock.Object)
             {
                 ApiKey = "ApiKey",
@@ -39,7 +36,50 @@ namespace Elmah.Io.NLog.Tests
 
             LogManager.Configuration = config;
 
-            var logger = LogManager.GetLogger("Test");
+            logger = LogManager.GetLogger("Test");
+        }
+
+        [Test]
+        public void CanFillFieldsFromStructuredLogging()
+        {
+            // Arrange
+            CreateMessage loggedMessage = null;
+            messagesMock
+                .Setup(x => x.CreateAndNotify(It.IsAny<Guid>(), It.IsAny<CreateMessage>()))
+                .Callback<Guid, CreateMessage>((logId, msg) =>
+                {
+                    loggedMessage = msg;
+                });
+
+            // Act
+            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application}",
+                HttpMethod.Get, "1.0.0", new Uri("http://a.b/"), "Mal", "System.NullReferenceException", 404, "The source", "The hostname", "The application");
+
+            // Assert
+            Assert.That(loggedMessage, Is.Not.Null);
+            Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\""));
+            Assert.That(loggedMessage.Method, Is.EqualTo("GET"));
+            Assert.That(loggedMessage.Version, Is.EqualTo("1.0.0"));
+            Assert.That(loggedMessage.Url, Is.EqualTo("http://a.b/"));
+            Assert.That(loggedMessage.User, Is.EqualTo("Mal"));
+            Assert.That(loggedMessage.Type, Is.EqualTo("System.NullReferenceException"));
+            Assert.That(loggedMessage.StatusCode, Is.EqualTo(404));
+            Assert.That(loggedMessage.Source, Is.EqualTo("The source"));
+            Assert.That(loggedMessage.Hostname, Is.EqualTo("The hostname"));
+            Assert.That(loggedMessage.Application, Is.EqualTo("The application"));
+        }
+
+        [Test]
+        public void CanWrite()
+        {
+            // Arrange
+            CreateMessage loggedMessage = null;
+            messagesMock
+                .Setup(x => x.CreateAndNotify(It.IsAny<Guid>(), It.IsAny<CreateMessage>()))
+                .Callback<Guid, CreateMessage>((logId, msg) =>
+                {
+                    loggedMessage = msg;
+                });
 
             // Act
             var logEventInfo = new LogEventInfo(LogLevel.Warn, "", "Warning");

@@ -18,7 +18,7 @@ namespace Elmah.Io.NLog.Console
 
             log.Warn("This is a warning message");
             log.Trace("This is a trace message");
-            log.Info("This is info with some structured logging: {quote}", "Hasta la vista, baby");
+            log.Info("This is info with some structured logging: {quote} from {user}", "Hasta la vista, baby", "Arnold Schwarzenegger");
             System.Console.ReadLine();
         }
     }

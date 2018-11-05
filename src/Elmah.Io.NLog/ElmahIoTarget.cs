@@ -68,17 +68,39 @@ namespace Elmah.Io.NLog
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent),
-                Source = logEvent.LoggerName,
-                Hostname = MachineName(logEvent),
-                Application = Application,
+                Source = Source(logEvent),
+                Hostname = Hostname(logEvent),
+                Application = ApplicationName(logEvent),
                 User = User(logEvent),
+                // Resolve the rest from structured logging
+                Method = logEvent.String("method"),
+                Version = logEvent.String("version"),
+                Url = logEvent.String("url"),
+                Type = logEvent.String("type"),
+                StatusCode = logEvent.Integer("statuscode"),
             };
 
             _client.Messages.CreateAndNotify(_logId, message);
         }
 
-        private string MachineName(LogEventInfo logEvent)
+        private string ApplicationName(LogEventInfo logEvent)
         {
+            var application = logEvent.String("application");
+            if (!string.IsNullOrWhiteSpace(application)) return application;
+            return Application;
+        }
+
+        private string Source(LogEventInfo logEvent)
+        {
+            var source = logEvent.String("source");
+            if (!string.IsNullOrWhiteSpace(source)) return source;
+            return logEvent.LoggerName;
+        }
+
+        private string Hostname(LogEventInfo logEvent)
+        {
+            var hostname = logEvent.String("hostname");
+            if (!string.IsNullOrWhiteSpace(hostname)) return hostname;
             if (_machineNameLayoutRenderer == null)
             {
                 _machineNameLayoutRenderer = new MachineNameLayoutRenderer();
@@ -88,6 +110,8 @@ namespace Elmah.Io.NLog
 
         private string User(LogEventInfo logEvent)
         {
+            var user = logEvent.String("user");
+            if (!string.IsNullOrWhiteSpace(user)) return user;
 #if NET45
             if (_identityLayoutRenderer == null)
             {
@@ -98,7 +122,7 @@ namespace Elmah.Io.NLog
                     IsAuthenticated = false
                 };
             }
-            var user = _identityLayoutRenderer.Render(logEvent);
+            user = _identityLayoutRenderer.Render(logEvent);
             return string.IsNullOrWhiteSpace(user) ? null : user;
 #else
             return null;

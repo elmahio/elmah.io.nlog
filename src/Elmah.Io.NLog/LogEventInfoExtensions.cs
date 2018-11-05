@@ -8,7 +8,7 @@ namespace Elmah.Io.NLog
     {
         internal static int? Integer(this LogEventInfo logEvent, string name)
         {
-            if (logEvent.Properties == null || !logEvent.Properties.Any()) return null;
+            if (!logEvent.HasProperties) return null;
             if (!logEvent.Properties.Keys.Any(key => name.Equals(key.ToString(), StringComparison.OrdinalIgnoreCase))) return null;
 
             var property = logEvent.Properties.First(prop => name.Equals(prop.Key.ToString(), StringComparison.OrdinalIgnoreCase));
@@ -21,7 +21,7 @@ namespace Elmah.Io.NLog
 
         internal static string String(this LogEventInfo logEvent, string name)
         {
-            if (logEvent.Properties == null || !logEvent.Properties.Any()) return null;
+            if (!logEvent.HasProperties) return null;
             if (!logEvent.Properties.Keys.Any(key => name.Equals(key.ToString(), StringComparison.OrdinalIgnoreCase))) return null;
 
             var property = logEvent.Properties.First(prop => name.Equals(prop.Key.ToString(), StringComparison.OrdinalIgnoreCase));

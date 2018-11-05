@@ -131,7 +131,7 @@ namespace Elmah.Io.NLog
 
         private List<Item> PropertiesToData(LogEventInfo logEvent)
         {
-            if (logEvent.Properties == null || logEvent.Properties.Count == 0) return null;
+            if (!logEvent.HasProperties) return null;
 
             var items = new List<Item>();
             foreach (var obj in logEvent.Properties)

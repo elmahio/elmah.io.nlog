@@ -14,6 +14,7 @@ namespace Elmah.Io.NLog.Console
 
             var infoMessage = new LogEventInfo(LogLevel.Info, "", "This is an information message");
             infoMessage.Properties.Add("Some Property Key", "Some Property Value");
+            infoMessage.Properties.Add("Some list", new[] { 1, 2, 3 });
             log.Info(infoMessage);
 
             log.Warn("This is a warning message");

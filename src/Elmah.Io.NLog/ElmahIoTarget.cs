@@ -5,7 +5,9 @@ using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
-using NLog.LayoutRenderers;
+using NLog.Layouts;
+using System.Text;
+using NLog.MessageTemplates;
 
 namespace Elmah.Io.NLog
 {
@@ -36,11 +38,27 @@ namespace Elmah.Io.NLog
 
         public string Application { get; set; }
 
-        private MachineNameLayoutRenderer _machineNameLayoutRenderer;
+        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${machinename}}";
+
+        public Layout SourceLayout { get; set; } = "${event-properties:source}";
+
+        public Layout ApplicationLayout { get; set; } = "${event-properties:application}";
 
 #if NET45
-        private IdentityLayoutRenderer _identityLayoutRenderer;
+        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${identity:authType=false:isAuthenticated=false}}";
+#else
+        public Layout UserLayout { get; set; } = "${event-properties:user}";
 #endif
+
+        public Layout MethodLayout { get; set; } = "${event-properties:method}";
+
+        public Layout VersionLayout { get; set; } = "${event-properties:version}";
+
+        public Layout UrlLayout { get; set; } = "${event-properties:url}";
+
+        public Layout TypeLayout { get; set; } = "${event-properties:type}";
+
+        public Layout StatusCodeLayout { get; set; } = "${event-properties:statuscode}";
 
         public ElmahIoTarget()
         {
@@ -75,15 +93,15 @@ namespace Elmah.Io.NLog
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent),
                 Source = Source(logEvent),
-                Hostname = Hostname(logEvent),
+                Hostname = RenderLogEvent(HostnameLayout, logEvent),
                 Application = ApplicationName(logEvent),
-                User = User(logEvent),
+                User = RenderLogEvent(UserLayout, logEvent),
                 // Resolve the rest from structured logging
-                Method = logEvent.String("method"),
-                Version = logEvent.String("version"),
-                Url = logEvent.String("url"),
-                Type = logEvent.String("type"),
-                StatusCode = logEvent.Integer("statuscode"),
+                Method = RenderLogEvent(MethodLayout, logEvent),
+                Version = RenderLogEvent(VersionLayout, logEvent),
+                Url = RenderLogEvent(UrlLayout, logEvent),
+                Type = RenderLogEvent(TypeLayout, logEvent),
+                StatusCode = StatusCode(logEvent),
             };
 
             _client.Messages.CreateAndNotify(_logId, message);
@@ -91,48 +109,24 @@ namespace Elmah.Io.NLog
 
         private string ApplicationName(LogEventInfo logEvent)
         {
-            var application = logEvent.String("application");
+            var application = RenderLogEvent(ApplicationLayout, logEvent);
             if (!string.IsNullOrWhiteSpace(application)) return application;
             return Application;
         }
 
         private string Source(LogEventInfo logEvent)
         {
-            var source = logEvent.String("source");
+            var source = RenderLogEvent(SourceLayout, logEvent);
             if (!string.IsNullOrWhiteSpace(source)) return source;
             return logEvent.LoggerName;
         }
 
-        private string Hostname(LogEventInfo logEvent)
+        private int? StatusCode(LogEventInfo logEvent)
         {
-            var hostname = logEvent.String("hostname");
-            if (!string.IsNullOrWhiteSpace(hostname)) return hostname;
-            if (_machineNameLayoutRenderer == null)
-            {
-                _machineNameLayoutRenderer = new MachineNameLayoutRenderer();
-            }
-            return _machineNameLayoutRenderer.Render(logEvent);
-        }
-
-        private string User(LogEventInfo logEvent)
-        {
-            var user = logEvent.String("user");
-            if (!string.IsNullOrWhiteSpace(user)) return user;
-#if NET45
-            if (_identityLayoutRenderer == null)
-            {
-                _identityLayoutRenderer = new IdentityLayoutRenderer
-                {
-                    Name = true,
-                    AuthType = false,
-                    IsAuthenticated = false
-                };
-            }
-            user = _identityLayoutRenderer.Render(logEvent);
-            return string.IsNullOrWhiteSpace(user) ? null : user;
-#else
-            return null;
-#endif
+            var statusCode = RenderLogEvent(StatusCodeLayout, logEvent);
+            if (string.IsNullOrWhiteSpace(statusCode)) return null;
+            if (!int.TryParse(statusCode, out int result)) return null;
+            return result;
         }
 
         private List<Item> PropertiesToData(LogEventInfo logEvent)
@@ -140,11 +134,15 @@ namespace Elmah.Io.NLog
             if (!logEvent.HasProperties) return null;
 
             var items = new List<Item>();
+            var valueFormatter = ConfigurationItemFactory.Default.ValueFormatter;
             foreach (var obj in logEvent.Properties)
             {
                 if (obj.Value != null)
                 {
-                    items.Add(new Item { Key = obj.Key.ToString(), Value = obj.Value.ToString() });
+                    var sb = new StringBuilder();
+                    valueFormatter.FormatValue(obj.Value, null, CaptureType.Normal, null, sb);
+                    var text = sb.ToString();
+                    items.Add(new Item { Key = obj.Key.ToString(), Value = text });
                 }
             }
             return items;

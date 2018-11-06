@@ -13,7 +13,8 @@ namespace Elmah.Io.NLog
     public class ElmahIoTarget : TargetWithLayout
     {
         private IElmahioAPI _client;
-
+        private readonly string DefaultLayout;
+        private bool _usingDefaultLayout;
         private Guid _logId;
 
         [RequiredParameter]
@@ -43,11 +44,18 @@ namespace Elmah.Io.NLog
 
         public ElmahIoTarget()
         {
+            OptimizeBufferReuse = true;
+            DefaultLayout = Layout?.ToString();
         }
 
-        public ElmahIoTarget(IElmahioAPI client)
+        public ElmahIoTarget(IElmahioAPI client) : this()
         {
             _client = client;
+        }
+
+        protected override void InitializeTarget()
+        {
+            _usingDefaultLayout = Layout?.ToString() == DefaultLayout;
         }
 
         protected override void Write(LogEventInfo logEvent)
@@ -57,9 +65,7 @@ namespace Elmah.Io.NLog
                 _client = ElmahioAPI.Create(ApiKey);
             }
 
-            var title = Layout != null && Layout.ToString() != "'${longdate}|${level:uppercase=true}|${logger}|${message}'"
-                ? Layout.Render(logEvent)
-                : logEvent.FormattedMessage;
+            var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);
 
             var message = new CreateMessage
             {

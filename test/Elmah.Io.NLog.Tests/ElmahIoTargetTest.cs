@@ -25,7 +25,8 @@ namespace Elmah.Io.NLog.Tests
             var target = new ElmahIoTarget(clientMock.Object)
             {
                 ApiKey = "ApiKey",
-                LogId = Guid.NewGuid().ToString()
+                LogId = Guid.NewGuid().ToString(),
+                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}",
             };
 
             var config = new LoggingConfiguration();

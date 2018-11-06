@@ -36,7 +36,7 @@ namespace Elmah.Io.NLog
             }
         }
 
-        public string Application { get; set; }
+        public string Application { get => (ApplicationLayout as SimpleLayout)?.Text; set => ApplicationLayout = value; }
 
         public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}";
 
@@ -94,7 +94,7 @@ namespace Elmah.Io.NLog
                 Data = PropertiesToData(logEvent),
                 Source = RenderLogEvent(SourceLayout, logEvent),
                 Hostname = RenderLogEvent(HostnameLayout, logEvent),
-                Application = ApplicationName(logEvent),
+                Application = RenderLogEvent(ApplicationLayout, logEvent),
                 User = RenderLogEvent(UserLayout, logEvent),
                 // Resolve the rest from structured logging
                 Method = RenderLogEvent(MethodLayout, logEvent),
@@ -105,13 +105,6 @@ namespace Elmah.Io.NLog
             };
 
             _client.Messages.CreateAndNotify(_logId, message);
-        }
-
-        private string ApplicationName(LogEventInfo logEvent)
-        {
-            var application = RenderLogEvent(ApplicationLayout, logEvent);
-            if (!string.IsNullOrWhiteSpace(application)) return application;
-            return Application;
         }
 
         private int? StatusCode(LogEventInfo logEvent)

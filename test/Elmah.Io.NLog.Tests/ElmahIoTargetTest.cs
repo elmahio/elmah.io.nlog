@@ -53,7 +53,7 @@ namespace Elmah.Io.NLog.Tests
                 });
 
             // Act
-            logger.Info("Info message {method} {version} {url} {user} {type} {statuscode} {source} {hostname} {application}",
+            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application}",
                 HttpMethod.Get, "1.0.0", new Uri("http://a.b/"), "Mal", "System.NullReferenceException", 404, "The source", "The hostname", "The application");
 
             // Assert
@@ -94,7 +94,7 @@ namespace Elmah.Io.NLog.Tests
             Assert.That(loggedMessage.Title, Does.Contain("Warning"));
             Assert.That(loggedMessage.Data.Count, Is.EqualTo(2));
             Assert.That(loggedMessage.Data.First().Key, Is.EqualTo("Key"));
-            Assert.That(loggedMessage.Data.First().Value, Is.EqualTo("\"Value\""));
+            Assert.That(loggedMessage.Data.First().Value, Is.EqualTo("Value"));
             Assert.That(loggedMessage.Data.Last().Key, Is.EqualTo("List"));
             Assert.That(loggedMessage.Data.Last().Value, Is.EqualTo("1, 2, 3"));
         }

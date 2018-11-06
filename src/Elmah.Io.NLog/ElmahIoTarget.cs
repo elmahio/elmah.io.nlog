@@ -38,27 +38,27 @@ namespace Elmah.Io.NLog
 
         public string Application { get; set; }
 
-        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${machinename}}";
+        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}";
 
-        public Layout SourceLayout { get; set; } = "${event-properties:source}";
+        public Layout SourceLayout { get; set; } = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
 
-        public Layout ApplicationLayout { get; set; } = "${event-properties:application}";
+        public Layout ApplicationLayout { get; set; } = "${event-properties:application:whenEmpty=${event-properties:Application}}";
 
 #if NET45
-        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${identity:authType=false:isAuthenticated=false}}";
+        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${identity:authType=false:isAuthenticated=false}}}";
 #else
-        public Layout UserLayout { get; set; } = "${event-properties:user}";
+        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User}}";
 #endif
 
-        public Layout MethodLayout { get; set; } = "${event-properties:method}";
+        public Layout MethodLayout { get; set; } = "${event-properties:method:whenEmpty=${event-properties:Method}}";
 
-        public Layout VersionLayout { get; set; } = "${event-properties:version}";
+        public Layout VersionLayout { get; set; } = "${event-properties:version:whenEmpty=${event-properties:Version}}";
 
-        public Layout UrlLayout { get; set; } = "${event-properties:url}";
+        public Layout UrlLayout { get; set; } = "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL}}}";
 
-        public Layout TypeLayout { get; set; } = "${event-properties:type}";
+        public Layout TypeLayout { get; set; } = "${event-properties:type:whenEmpty=${event-properties:Type}}";
 
-        public Layout StatusCodeLayout { get; set; } = "${event-properties:statuscode}";
+        public Layout StatusCodeLayout { get; set; } = "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}";
 
         public ElmahIoTarget()
         {
@@ -73,7 +73,7 @@ namespace Elmah.Io.NLog
 
         protected override void InitializeTarget()
         {
-            _usingDefaultLayout = Layout?.ToString() == DefaultLayout;
+            _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
         }
 
         protected override void Write(LogEventInfo logEvent)
@@ -92,7 +92,7 @@ namespace Elmah.Io.NLog
                 DateTime = logEvent.TimeStamp.ToUniversalTime(),
                 Detail = logEvent.Exception?.ToString(),
                 Data = PropertiesToData(logEvent),
-                Source = Source(logEvent),
+                Source = RenderLogEvent(SourceLayout, logEvent),
                 Hostname = RenderLogEvent(HostnameLayout, logEvent),
                 Application = ApplicationName(logEvent),
                 User = RenderLogEvent(UserLayout, logEvent),
@@ -114,13 +114,6 @@ namespace Elmah.Io.NLog
             return Application;
         }
 
-        private string Source(LogEventInfo logEvent)
-        {
-            var source = RenderLogEvent(SourceLayout, logEvent);
-            if (!string.IsNullOrWhiteSpace(source)) return source;
-            return logEvent.LoggerName;
-        }
-
         private int? StatusCode(LogEventInfo logEvent)
         {
             var statusCode = RenderLogEvent(StatusCodeLayout, logEvent);
@@ -134,14 +127,23 @@ namespace Elmah.Io.NLog
             if (!logEvent.HasProperties) return null;
 
             var items = new List<Item>();
+            StringBuilder sb = new StringBuilder();
             var valueFormatter = ConfigurationItemFactory.Default.ValueFormatter;
             foreach (var obj in logEvent.Properties)
             {
                 if (obj.Value != null)
                 {
-                    var sb = new StringBuilder();
-                    valueFormatter.FormatValue(obj.Value, null, CaptureType.Normal, null, sb);
-                    var text = sb.ToString();
+                    string text;
+                    if (obj.Value is string)
+                    {
+                        text = (string)obj.Value;
+                    }
+                    else
+                    {
+                        sb.Length = 0;  // Reuse StringBuilder
+                        valueFormatter.FormatValue(obj.Value, null, CaptureType.Normal, null, sb);
+                        text = sb.ToString();
+                    }
                     items.Add(new Item { Key = obj.Key.ToString(), Value = text });
                 }
             }

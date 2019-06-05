@@ -18,9 +18,21 @@ namespace Elmah.Io.NLog
         private readonly string DefaultLayout;
         private bool _usingDefaultLayout;
         private Guid _logId;
+        private string _apiKey;
 
         [RequiredParameter]
-        public string ApiKey { get; set; }
+        public string ApiKey
+        {
+            get
+            {
+                return _apiKey;
+            }
+            set
+            {
+                var apiKey = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
+                _apiKey = apiKey;
+            }
+        }
 
         // Needs to be a string and not a guid, in order for .NET core to work
         [RequiredParameter]
@@ -32,7 +44,8 @@ namespace Elmah.Io.NLog
             }
             set
             {
-                _logId = Guid.Parse(value);
+                var logId = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
+                _logId = Guid.Parse(logId);
             }
         }
 
@@ -80,7 +93,7 @@ namespace Elmah.Io.NLog
         {
             if (_client == null)
             {
-                _client = ElmahioAPI.Create(ApiKey);
+                _client = ElmahioAPI.Create(_apiKey);
             }
 
             var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);

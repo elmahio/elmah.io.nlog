@@ -8,12 +8,20 @@ using NLog.Targets;
 using NLog.Layouts;
 using System.Text;
 using NLog.MessageTemplates;
+using System.Net.Http.Headers;
+using System.Reflection;
 
 namespace Elmah.Io.NLog
 {
     [Target("elmah.io")]
     public class ElmahIoTarget : TargetWithLayout
     {
+#if DOTNETCORE
+        internal static string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+#else
+        internal static string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
+#endif
+
         private IElmahioAPI _client;
         private readonly string DefaultLayout;
         private bool _usingDefaultLayout;
@@ -48,6 +56,12 @@ namespace Elmah.Io.NLog
                 _logId = Guid.Parse(logId);
             }
         }
+
+        public Action<CreateMessage> OnMessage { get; set; }
+
+        public Action<CreateMessage, Exception> OnError { get; set; }
+
+        public Func<CreateMessage, bool> OnFilter { get; set; }
 
         public string Application { get => (ApplicationLayout as SimpleLayout)?.Text; set => ApplicationLayout = value; }
 
@@ -93,7 +107,19 @@ namespace Elmah.Io.NLog
         {
             if (_client == null)
             {
-                _client = ElmahioAPI.Create(_apiKey);
+                ElmahioAPI api = new ElmahioAPI(new ApiKeyCredentials(ApiKey), HttpClientHandlerFactory.GetHttpClientHandler());
+                api.HttpClient.Timeout = new TimeSpan(0, 0, 5);
+                api.HttpClient.DefaultRequestHeaders.UserAgent.Clear();
+                api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));
+                api.Messages.OnMessage += (sender, args) =>
+                {
+                    OnMessage?.Invoke(args.Message);
+                };
+                api.Messages.OnMessageFail += (sender, args) =>
+                {
+                    OnError?.Invoke(args.Message, args.Error);
+                };
+                _client = api;
             }
 
             var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);
@@ -116,6 +142,11 @@ namespace Elmah.Io.NLog
                 Type = RenderLogEvent(TypeLayout, logEvent),
                 StatusCode = StatusCode(logEvent),
             };
+
+            if (OnFilter != null && OnFilter(message))
+            {
+                return;
+            }
 
             _client.Messages.CreateAndNotify(_logId, message);
         }

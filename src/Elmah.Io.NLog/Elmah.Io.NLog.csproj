@@ -24,4 +24,8 @@
     <PackageReference Include="NLog" Version="4.5.1" />
     <PackageReference Include="Elmah.Io.Client" Version="[3.4.63,4)" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
+     <DefineConstants>$(DefineConstants);DOTNETCORE</DefineConstants>
+  </PropertyGroup>
 </Project>

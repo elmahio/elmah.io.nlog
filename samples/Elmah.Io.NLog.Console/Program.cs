@@ -21,6 +21,7 @@ namespace Elmah.Io.NLog.Console
             log.Trace("This is a trace message");
             log.Info("This is info with some structured logging: {quote} from {user}", "Hasta la vista, baby", "Arnold Schwarzenegger");
             System.Console.ReadLine();
+            LogManager.Shutdown();  // Flushes and closes all targets (recommended to call this just before application exit)
         }
     }
 }

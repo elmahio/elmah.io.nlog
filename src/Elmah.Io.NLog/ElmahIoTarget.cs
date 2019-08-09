@@ -10,11 +10,13 @@ using System.Text;
 using NLog.MessageTemplates;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Elmah.Io.NLog
 {
     [Target("elmah.io")]
-    public class ElmahIoTarget : TargetWithLayout
+    public class ElmahIoTarget : AsyncTaskTarget
     {
 #if DOTNETCORE
         internal static string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
@@ -89,8 +91,12 @@ namespace Elmah.Io.NLog
 
         public ElmahIoTarget()
         {
-            OptimizeBufferReuse = true;
             DefaultLayout = Layout?.ToString();
+            IncludeEventProperties = true;
+            TaskDelayMilliseconds = 250;// Delay to optimize for bulk send (reduce http requests)
+            TaskTimeoutSeconds = 150;   // Long timeout to allow http request to complete before starting next task
+            RetryCount = 0;             // Skip retry on error / timeout
+            BatchSize = 50;             // Avoid too many messages in a single batch (reduce request size)
         }
 
         public ElmahIoTarget(IElmahioAPI client) : this()
@@ -101,9 +107,15 @@ namespace Elmah.Io.NLog
         protected override void InitializeTarget()
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
+            base.InitializeTarget();
         }
 
-        protected override void Write(LogEventInfo logEvent)
+        protected override Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();    // Never reached, because of override of IList-handler
+        }
+
+        protected override Task WriteAsyncTask(IList<LogEventInfo> logEvents, CancellationToken cancellationToken)
         {
             if (_client == null)
             {
@@ -122,33 +134,51 @@ namespace Elmah.Io.NLog
                 _client = api;
             }
 
-            var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);
-
-            var message = new CreateMessage
+            IList<CreateMessage> messages = null;
+            for (int i = 0; i < logEvents.Count; ++i)
             {
-                Title = title,
-                Severity = LevelToSeverity(logEvent.Level),
-                DateTime = logEvent.TimeStamp.ToUniversalTime(),
-                Detail = logEvent.Exception?.ToString(),
-                Data = PropertiesToData(logEvent),
-                Source = RenderLogEvent(SourceLayout, logEvent),
-                Hostname = RenderLogEvent(HostnameLayout, logEvent),
-                Application = RenderLogEvent(ApplicationLayout, logEvent),
-                User = RenderLogEvent(UserLayout, logEvent),
-                // Resolve the rest from structured logging
-                Method = RenderLogEvent(MethodLayout, logEvent),
-                Version = RenderLogEvent(VersionLayout, logEvent),
-                Url = RenderLogEvent(UrlLayout, logEvent),
-                Type = RenderLogEvent(TypeLayout, logEvent),
-                StatusCode = StatusCode(logEvent),
-            };
+                var logEvent = logEvents[i];
+                var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);
 
-            if (OnFilter != null && OnFilter(message))
-            {
-                return;
+                var message = new CreateMessage
+                {
+                    Title = title,
+                    Severity = LevelToSeverity(logEvent.Level),
+                    DateTime = logEvent.TimeStamp.ToUniversalTime(),
+                    Detail = logEvent.Exception?.ToString(),
+                    Data = PropertiesToData(logEvent),
+                    Source = RenderLogEvent(SourceLayout, logEvent),
+                    Hostname = RenderLogEvent(HostnameLayout, logEvent),
+                    Application = RenderLogEvent(ApplicationLayout, logEvent),
+                    User = RenderLogEvent(UserLayout, logEvent),
+                    // Resolve the rest from structured logging
+                    Method = RenderLogEvent(MethodLayout, logEvent),
+                    Version = RenderLogEvent(VersionLayout, logEvent),
+                    Url = RenderLogEvent(UrlLayout, logEvent),
+                    Type = RenderLogEvent(TypeLayout, logEvent),
+                    StatusCode = StatusCode(logEvent),
+                };
+
+                if (OnFilter != null && OnFilter(message))
+                {
+                    continue;
+                }
+
+                if (logEvents.Count == 1)
+                {
+                    return _client.Messages.CreateAndNotifyAsync(_logId, message);
+                }
+
+                messages = messages ?? new List<CreateMessage>(logEvents.Count);
+                messages.Add(message);
             }
 
-            _client.Messages.CreateAndNotify(_logId, message);
+            if (messages?.Count > 0)
+            {
+                return _client.Messages.CreateBulkAndNotifyAsync(_logId, messages);
+            }
+
+            return Task.FromResult<Message>(null);
         }
 
         private int? StatusCode(LogEventInfo logEvent)
@@ -161,12 +191,14 @@ namespace Elmah.Io.NLog
 
         private List<Item> PropertiesToData(LogEventInfo logEvent)
         {
-            if (!logEvent.HasProperties) return null;
+            if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0) return null;
+
+            var properties = GetAllProperties(logEvent);
 
             var items = new List<Item>();
             StringBuilder sb = new StringBuilder();
             var valueFormatter = ConfigurationItemFactory.Default.ValueFormatter;
-            foreach (var obj in logEvent.Properties)
+            foreach (var obj in properties)
             {
                 if (obj.Value != null)
                 {
@@ -181,7 +213,7 @@ namespace Elmah.Io.NLog
                         valueFormatter.FormatValue(obj.Value, null, CaptureType.Normal, null, sb);
                         text = sb.ToString();
                     }
-                    items.Add(new Item { Key = obj.Key.ToString(), Value = text });
+                    items.Add(new Item { Key = obj.Key, Value = text });
                 }
             }
             return items;

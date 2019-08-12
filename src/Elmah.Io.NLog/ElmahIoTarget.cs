@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace Elmah.Io.NLog
 {
@@ -67,6 +68,8 @@ namespace Elmah.Io.NLog
 
         public string Application { get => (ApplicationLayout as SimpleLayout)?.Text; set => ApplicationLayout = value; }
 
+        public IWebProxy WebProxy { get; set; }
+
         public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}";
 
         public Layout SourceLayout { get; set; } = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
@@ -119,7 +122,10 @@ namespace Elmah.Io.NLog
         {
             if (_client == null)
             {
-                ElmahioAPI api = new ElmahioAPI(new ApiKeyCredentials(ApiKey), HttpClientHandlerFactory.GetHttpClientHandler());
+                ElmahioAPI api = new ElmahioAPI(new ApiKeyCredentials(ApiKey), HttpClientHandlerFactory.GetHttpClientHandler(new ElmahIoOptions
+                {
+                    WebProxy = WebProxy
+                }));
                 api.HttpClient.Timeout = new TimeSpan(0, 0, 5);
                 api.HttpClient.DefaultRequestHeaders.UserAgent.Clear();
                 api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));

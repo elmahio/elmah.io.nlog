@@ -67,6 +67,7 @@ namespace Elmah.Io.NLog.Tests
             // Assert
             Assert.That(loggedMessage, Is.Not.Null);
             Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\""));
+            Assert.That(loggedMessage.TitleTemplate, Is.EqualTo("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application}"));
             Assert.That(loggedMessage.Method, Is.EqualTo("GET"));
             Assert.That(loggedMessage.Version, Is.EqualTo("1.0.0"));
             Assert.That(loggedMessage.Url, Is.EqualTo("http://a.b/"));

@@ -149,6 +149,7 @@ namespace Elmah.Io.NLog
                 var message = new CreateMessage
                 {
                     Title = title,
+                    TitleTemplate = logEvent.Message ?? title,
                     Severity = LevelToSeverity(logEvent.Level),
                     DateTime = logEvent.TimeStamp.ToUniversalTime(),
                     Detail = logEvent.Exception?.ToString(),

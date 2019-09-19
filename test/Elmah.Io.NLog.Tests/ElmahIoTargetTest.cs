@@ -55,8 +55,20 @@ namespace Elmah.Io.NLog.Tests
                 });
 
             // Act
-            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application}",
-                HttpMethod.Get, "1.0.0", new Uri("http://a.b/"), "Mal", "System.NullReferenceException", 404, "The source", "The hostname", "The application");
+            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {serverVariables} {cookies} {form} {queryString}",
+                HttpMethod.Get,
+                "1.0.0",
+                new Uri("http://a.b/"),
+                "Mal",
+                "System.NullReferenceException",
+                404,
+                "The source",
+                "The hostname",
+                "The application",
+                new Dictionary<string, string> { { "serverVariableKey", "serverVariableValue" } },
+                new Dictionary<string, string> { { "cookieKey", "cookieValue" } },
+                new Dictionary<string, string> { { "formKey", "formValue" } },
+                new Dictionary<string, string> { { "queryStringKey", "queryStringValue" } });
             for (int i = 0; i < 10; ++i)
             {
                 if (loggedMessage != null)
@@ -66,17 +78,21 @@ namespace Elmah.Io.NLog.Tests
 
             // Assert
             Assert.That(loggedMessage, Is.Not.Null);
-            Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\""));
-            Assert.That(loggedMessage.TitleTemplate, Is.EqualTo("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application}"));
+            Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\" \"serverVariableKey\"=\"serverVariableValue\" \"cookieKey\"=\"cookieValue\" \"formKey\"=\"formValue\" \"queryStringKey\"=\"queryStringValue\""));
+            Assert.That(loggedMessage.TitleTemplate, Is.EqualTo("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {serverVariables} {cookies} {form} {queryString}"));
             Assert.That(loggedMessage.Method, Is.EqualTo("GET"));
             Assert.That(loggedMessage.Version, Is.EqualTo("1.0.0"));
-            Assert.That(loggedMessage.Url, Is.EqualTo("http://a.b/"));
+            Assert.That(loggedMessage.Url, Is.EqualTo("/"));
             Assert.That(loggedMessage.User, Is.EqualTo("Mal"));
             Assert.That(loggedMessage.Type, Is.EqualTo("System.NullReferenceException"));
             Assert.That(loggedMessage.StatusCode, Is.EqualTo(404));
             Assert.That(loggedMessage.Source, Is.EqualTo("The source"));
             Assert.That(loggedMessage.Hostname, Is.EqualTo("The hostname"));
             Assert.That(loggedMessage.Application, Is.EqualTo("The application"));
+            Assert.That(loggedMessage.ServerVariables.Any(sv => sv.Key == "serverVariableKey" && sv.Value == "serverVariableValue"));
+            Assert.That(loggedMessage.Cookies.Any(sv => sv.Key == "cookieKey" && sv.Value == "cookieValue"));
+            Assert.That(loggedMessage.Form.Any(sv => sv.Key == "formKey" && sv.Value == "formValue"));
+            Assert.That(loggedMessage.QueryString.Any(sv => sv.Key == "queryStringKey" && sv.Value == "queryStringValue"));
         }
 
         [Test]

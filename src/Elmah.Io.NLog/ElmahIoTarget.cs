@@ -13,6 +13,10 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Elmah.Io.NLog
 {
@@ -70,23 +74,31 @@ namespace Elmah.Io.NLog
 
         public IWebProxy WebProxy { get; set; }
 
-        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}";
+        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${aspnet-request-host:whenEmpty=${machinename}}}}}";
+
+        public Layout CookieLayout { get; set; } = "${event-properties:cookies:whenEmpty=${event-properties:Cookies:whenEmpty=${aspnet-request-cookie:outputFormat=Json}}}";
+
+        public Layout FormLayout { get; set; } = "${event-properties:form:whenEmpty=${event-properties:Form:whenEmpty=${aspnet-request-form:outputFormat=Json}}}";
+
+        public Layout QueryStringLayout { get; set; } = "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString:whenEmpty=${aspnet-request-querystring:outputFormat=Json}}}}";
+
+        public Layout HeadersLayout { get; set; } = "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables:whenEmpty=${aspnet-request-headers:outputFormat=Json}}}}";
 
         public Layout SourceLayout { get; set; } = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
 
         public Layout ApplicationLayout { get; set; } = "${event-properties:application:whenEmpty=${event-properties:Application}}";
 
 #if NET45
-        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${identity:authType=false:isAuthenticated=false}}}";
+        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${identity:authType=false:isAuthenticated=false}}}}";
 #else
-        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User}}";
+        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity}}}";
 #endif
 
-        public Layout MethodLayout { get; set; } = "${event-properties:method:whenEmpty=${event-properties:Method}}";
+        public Layout MethodLayout { get; set; } = "${event-properties:method:whenEmpty=${event-properties:Method:whenEmpty=${aspnet-request-method}}}";
 
         public Layout VersionLayout { get; set; } = "${event-properties:version:whenEmpty=${event-properties:Version}}";
 
-        public Layout UrlLayout { get; set; } = "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL}}}";
+        public Layout UrlLayout { get; set; } = "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL:whenEmpty=${aspnet-request-url}}}}";
 
         public Layout TypeLayout { get; set; } = "${event-properties:type:whenEmpty=${event-properties:Type}}";
 
@@ -154,16 +166,19 @@ namespace Elmah.Io.NLog
                     DateTime = logEvent.TimeStamp.ToUniversalTime(),
                     Detail = logEvent.Exception?.ToString(),
                     Data = PropertiesToData(logEvent),
-                    Source = RenderLogEvent(SourceLayout, logEvent),
+                    Source = Source(logEvent),
                     Hostname = RenderLogEvent(HostnameLayout, logEvent),
                     Application = RenderLogEvent(ApplicationLayout, logEvent),
                     User = RenderLogEvent(UserLayout, logEvent),
-                    // Resolve the rest from structured logging
                     Method = RenderLogEvent(MethodLayout, logEvent),
                     Version = RenderLogEvent(VersionLayout, logEvent),
-                    Url = RenderLogEvent(UrlLayout, logEvent),
-                    Type = RenderLogEvent(TypeLayout, logEvent),
+                    Url = Url(logEvent),
+                    Type = Type(logEvent),
                     StatusCode = StatusCode(logEvent),
+                    ServerVariables = RenderItems(logEvent, HeadersLayout),
+                    Cookies = RenderItems(logEvent, CookieLayout),
+                    Form = RenderItems(logEvent, FormLayout),
+                    QueryString = RenderItems(logEvent, QueryStringLayout),
                 };
 
                 if (OnFilter != null && OnFilter(message))
@@ -186,6 +201,64 @@ namespace Elmah.Io.NLog
             }
 
             return Task.FromResult<Message>(null);
+        }
+
+        private string Url(LogEventInfo logEvent)
+        {
+            var url = RenderLogEvent(UrlLayout, logEvent);
+            if (string.IsNullOrWhiteSpace(url)) return null;
+            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out Uri result)) return null;
+            if (result.IsAbsoluteUri) return result.AbsolutePath;
+            return result.OriginalString;
+        }
+
+        private string Type(LogEventInfo logEvent)
+        {
+            var type = RenderLogEvent(TypeLayout, logEvent);
+            if (!string.IsNullOrWhiteSpace(type)) return type;
+            if (logEvent.Exception != null) return logEvent.Exception.GetBaseException().GetType().FullName;
+            return null;
+        }
+
+        private string Source(LogEventInfo logEvent)
+        {
+            var source = RenderLogEvent(SourceLayout, logEvent);
+            if (!string.IsNullOrWhiteSpace(source)) return source;
+            if (logEvent.Exception == null) return logEvent.LoggerName;
+            return logEvent.Exception.GetBaseException().Source;
+        }
+
+        private IList<Item> RenderItems(LogEventInfo logEvent, Layout layout)
+        {
+            var rendered = RenderLogEvent(layout, logEvent);
+            if (string.IsNullOrWhiteSpace(rendered)) return null;
+            var items = new List<Item>();
+            if (rendered.StartsWith("[{") && rendered.EndsWith("}]")) // JSON rendered using a NLog ASP.NET layout renderer
+            {
+                var renderedJson = JsonConvert.DeserializeObject<JArray>(rendered);
+                foreach (JObject item in renderedJson)
+                {
+                    foreach (var property in item)
+                    {
+                        items.Add(new Item(property.Key, property.Value?.ToString()));
+                    }
+                }
+            }
+            else // User sended something with the right name as part of structured logging or custom properties
+            {
+                foreach (var keyAndValue in rendered.Split(new[] { "\", \"" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var keyAndValueSplit = keyAndValue.Split(new[] { "\"=\"" }, StringSplitOptions.None);
+                    if (keyAndValueSplit.Length <= 0) continue;
+                    var key = keyAndValueSplit[0]?.TrimStart(new[] { '\"' }).TrimEnd(new[] { '\"' });
+                    if (string.IsNullOrWhiteSpace(key)) continue;
+                    string value = null;
+                    if (keyAndValueSplit.Length > 1) value = keyAndValueSplit[1].TrimStart(new[] { '\"' }).TrimEnd(new[] { '\"' });
+                    items.Add(new Item(key, value));
+                }
+            }
+
+            return items;
         }
 
         private int? StatusCode(LogEventInfo logEvent)

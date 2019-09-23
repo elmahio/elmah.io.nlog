@@ -74,35 +74,31 @@ namespace Elmah.Io.NLog
 
         public IWebProxy WebProxy { get; set; }
 
-        public Layout HostnameLayout { get; set; } = "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${aspnet-request-host:whenEmpty=${machinename}}}}}";
+        public Layout HostnameLayout { get; set; }
 
-        public Layout CookieLayout { get; set; } = "${event-properties:cookies:whenEmpty=${event-properties:Cookies:whenEmpty=${aspnet-request-cookie:outputFormat=Json}}}";
+        public Layout CookieLayout { get; set; }
 
-        public Layout FormLayout { get; set; } = "${event-properties:form:whenEmpty=${event-properties:Form:whenEmpty=${aspnet-request-form:outputFormat=Json}}}";
+        public Layout FormLayout { get; set; }
 
-        public Layout QueryStringLayout { get; set; } = "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString:whenEmpty=${aspnet-request-querystring:outputFormat=Json}}}}";
+        public Layout QueryStringLayout { get; set; }
 
-        public Layout HeadersLayout { get; set; } = "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables:whenEmpty=${aspnet-request-headers:outputFormat=Json}}}}";
+        public Layout HeadersLayout { get; set; }
 
-        public Layout SourceLayout { get; set; } = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
+        public Layout SourceLayout { get; set; }
 
-        public Layout ApplicationLayout { get; set; } = "${event-properties:application:whenEmpty=${event-properties:Application}}";
+        public Layout ApplicationLayout { get; set; }
 
-#if NET45
-        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${identity:authType=false:isAuthenticated=false}}}}";
-#else
-        public Layout UserLayout { get; set; } = "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity}}}";
-#endif
+        public Layout UserLayout { get; set; }
 
-        public Layout MethodLayout { get; set; } = "${event-properties:method:whenEmpty=${event-properties:Method:whenEmpty=${aspnet-request-method}}}";
+        public Layout MethodLayout { get; set; }
 
-        public Layout VersionLayout { get; set; } = "${event-properties:version:whenEmpty=${event-properties:Version}}";
+        public Layout VersionLayout { get; set; }
 
-        public Layout UrlLayout { get; set; } = "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL:whenEmpty=${aspnet-request-url}}}}";
+        public Layout UrlLayout { get; set; }
 
-        public Layout TypeLayout { get; set; } = "${event-properties:type:whenEmpty=${event-properties:Type}}";
+        public Layout TypeLayout { get; set; }
 
-        public Layout StatusCodeLayout { get; set; } = "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}";
+        public Layout StatusCodeLayout { get; set; }
 
         public ElmahIoTarget()
         {
@@ -122,7 +118,65 @@ namespace Elmah.Io.NLog
         protected override void InitializeTarget()
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
+
+            TrySetLayout(
+                v => HostnameLayout = v,
+                "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${aspnet-request-host:whenEmpty=${machinename}}}}}",
+                "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}");
+            TrySetLayout(
+                v => CookieLayout = v,
+                "${event-properties:cookies:whenEmpty=${event-properties:Cookies:whenEmpty=${aspnet-request-cookie:outputFormat=Json}}}",
+                "${event-properties:cookies:whenEmpty=${event-properties:Cookies}}");
+            TrySetLayout(
+                v => FormLayout = v,
+                "${event-properties:form:whenEmpty=${event-properties:Form:whenEmpty=${aspnet-request-form:outputFormat=Json}}}",
+                "${event-properties:form:whenEmpty=${event-properties:Form}}");
+            TrySetLayout(
+                v => QueryStringLayout = v,
+                "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString:whenEmpty=${aspnet-request-querystring:outputFormat=Json}}}}",
+                "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString}}}");
+            TrySetLayout(
+                v => HeadersLayout = v,
+                "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables:whenEmpty=${aspnet-request-headers:outputFormat=Json}}}}",
+                "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables}}}");
+            SourceLayout = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
+            ApplicationLayout = "${event-properties:application:whenEmpty=${event-properties:Application}}";
+#if NET45
+            TrySetLayout(
+                v => UserLayout = v,
+                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${identity:authType=false:isAuthenticated=false}}}}",
+                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${identity:authType=false:isAuthenticated=false}}}");
+#else
+            TrySetLayout(
+                v => UserLayout = v,
+                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity}}}",
+                "${event-properties:user:whenEmpty=${event-properties:User}}");
+#endif
+            TrySetLayout(
+                v => MethodLayout = v,
+                "${event-properties:method:whenEmpty=${event-properties:Method:whenEmpty=${aspnet-request-method}}}",
+                "${event-properties:method:whenEmpty=${event-properties:Method}}");
+            VersionLayout = "${event-properties:version:whenEmpty=${event-properties:Version}}";
+            TrySetLayout(
+                v => UrlLayout = v,
+                "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL:whenEmpty=${aspnet-request-url}}}}",
+                "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL}}}");
+            TypeLayout = "${event-properties:type:whenEmpty=${event-properties:Type}}";
+            StatusCodeLayout = "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}";
             base.InitializeTarget();
+        }
+
+        private void TrySetLayout(Action<Layout> layout, string value, string fallback)
+        {
+            try
+            {
+                layout(value);
+            }
+            catch (ArgumentException)
+            {
+                layout(fallback);
+            }
+
         }
 
         protected override Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)

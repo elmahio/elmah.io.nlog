@@ -9,14 +9,14 @@ using NLog.Layouts;
 using System.Text;
 using NLog.MessageTemplates;
 using System.Net.Http.Headers;
+#if DOTNETCORE
 using System.Reflection;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace Elmah.Io.NLog
 {
@@ -162,7 +162,10 @@ namespace Elmah.Io.NLog
                 "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL:whenEmpty=${aspnet-request-url}}}}",
                 "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL}}}");
             TypeLayout = "${event-properties:type:whenEmpty=${event-properties:Type}}";
-            StatusCodeLayout = "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}";
+            TrySetLayout(
+                v => StatusCodeLayout = v,
+                "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode:whenEmpty=${aspnet-response-statuscode}}}}}",
+                "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}");
             base.InitializeTarget();
         }
 

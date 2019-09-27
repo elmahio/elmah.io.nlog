@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.Tests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.AspNetCore21", "samples\Elmah.Io.NLog.AspNetCore21\Elmah.Io.NLog.AspNetCore21.csproj", "{49C5E7D9-0A2E-482C-A32A-85E71001B703}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.AspNetMvc", "samples\Elmah.Io.NLog.AspNetMvc\Elmah.Io.NLog.AspNetMvc.csproj", "{FE584A59-3991-4316-88A7-CAF4EC5574C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{49C5E7D9-0A2E-482C-A32A-85E71001B703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49C5E7D9-0A2E-482C-A32A-85E71001B703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49C5E7D9-0A2E-482C-A32A-85E71001B703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE584A59-3991-4316-88A7-CAF4EC5574C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE584A59-3991-4316-88A7-CAF4EC5574C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE584A59-3991-4316-88A7-CAF4EC5574C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE584A59-3991-4316-88A7-CAF4EC5574C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{0626A469-C514-4FE0-ADDD-013B6D63AED7} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA} = {873FAF29-B362-452A-90EA-19F3FC3AD4CE}
 		{49C5E7D9-0A2E-482C-A32A-85E71001B703} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
+		{FE584A59-3991-4316-88A7-CAF4EC5574C5} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EB25BF6B-30A4-4F37-AFBC-F4318A1516C9}

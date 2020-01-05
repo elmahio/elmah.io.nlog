@@ -196,7 +196,7 @@ namespace Elmah.Io.NLog
                 {
                     WebProxy = WebProxy
                 });
-                api.HttpClient.Timeout = new TimeSpan(0, 0, 5);
+                api.HttpClient.Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30));
                 api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));
                 api.Messages.OnMessage += (sender, args) =>
                 {

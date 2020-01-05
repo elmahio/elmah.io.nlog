@@ -191,12 +191,11 @@ namespace Elmah.Io.NLog
         {
             if (_client == null)
             {
-                ElmahioAPI api = new ElmahioAPI(new ApiKeyCredentials(ApiKey), HttpClientHandlerFactory.GetHttpClientHandler(new ElmahIoOptions
+                var api = (ElmahioAPI)ElmahioAPI.Create(ApiKey, new ElmahIoOptions
                 {
                     WebProxy = WebProxy
-                }));
+                });
                 api.HttpClient.Timeout = new TimeSpan(0, 0, 5);
-                api.HttpClient.DefaultRequestHeaders.UserAgent.Clear();
                 api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));
                 api.Messages.OnMessage += (sender, args) =>
                 {

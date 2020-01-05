@@ -9,7 +9,7 @@ using NLog.Layouts;
 using System.Text;
 using NLog.MessageTemplates;
 using System.Net.Http.Headers;
-#if DOTNETCORE
+#if NETSTANDARD
 using System.Reflection;
 #endif
 using System.Threading;
@@ -23,7 +23,7 @@ namespace Elmah.Io.NLog
     [Target("elmah.io")]
     public class ElmahIoTarget : AsyncTaskTarget
     {
-#if DOTNETCORE
+#if NETSTANDARD
         internal static string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 #else
         internal static string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
@@ -149,8 +149,8 @@ namespace Elmah.Io.NLog
 #else
             TrySetLayout(
                 v => UserLayout = v,
-                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity}}}",
-                "${event-properties:user:whenEmpty=${event-properties:User}}");
+                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${environment-user}}}}",
+                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${environment-user}}}");
 #endif
             TrySetLayout(
                 v => MethodLayout = v,

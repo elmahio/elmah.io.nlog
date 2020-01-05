@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Elmah.Io.Client;
 using Elmah.Io.Client.Models;
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Layouts;
@@ -204,6 +205,7 @@ namespace Elmah.Io.NLog
                 };
                 api.Messages.OnMessageFail += (sender, args) =>
                 {
+                    InternalLogger.Error(args.Error, "ElmahIoTarget(Name={0}): Error - {1}", Name, args.Message);
                     OnError?.Invoke(args.Message, args.Error);
                 };
                 _client = api;

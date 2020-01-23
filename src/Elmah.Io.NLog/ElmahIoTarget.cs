@@ -120,8 +120,8 @@ namespace Elmah.Io.NLog
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
 
-            var throwExceptions = LogManager.ThrowExceptions;
-            LogManager.ThrowExceptions = true;
+            var throwConfigExceptions = LogManager.ThrowConfigExceptions;
+            LogManager.ThrowConfigExceptions = true;
 
             TrySetLayout(
                 v => HostnameLayout = v,
@@ -171,7 +171,7 @@ namespace Elmah.Io.NLog
                 "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode:whenEmpty=${aspnet-response-statuscode}}}}}",
                 "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}");
 
-            LogManager.ThrowExceptions = throwExceptions;
+            LogManager.ThrowConfigExceptions = throwConfigExceptions;
             base.InitializeTarget();
         }
 

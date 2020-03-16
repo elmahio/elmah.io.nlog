@@ -125,54 +125,147 @@ namespace Elmah.Io.NLog
 
             TrySetLayout(
                 v => HostnameLayout = v,
-                "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${aspnet-request-host:whenEmpty=${machinename}}}}}",
-                "${event-properties:hostname:whenEmpty=${event-properties:Hostname:whenEmpty=${event-properties:HostName:whenEmpty=${machinename}}}}");
+                ToLayout(
+                    "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
+                    "mdc:hostname", "mdc:Hostname", "mdc:HostName", "mdc:hostName",
+                    "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
+                    "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
+                    "aspnet-request-host", "machinename"),
+                ToLayout(
+                    "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
+                    "mdc:hostname", "mdc:Hostname", "mdc:HostName", "mdc:hostName",
+                    "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
+                    "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
+                    "machinename"));
             TrySetLayout(
                 v => CookieLayout = v,
-                "${event-properties:cookies:whenEmpty=${event-properties:Cookies:whenEmpty=${aspnet-request-cookie:outputFormat=Json}}}",
-                "${event-properties:cookies:whenEmpty=${event-properties:Cookies}}");
+                ToLayout("event-properties:cookies", "event-properties:Cookies", "aspnet-request-cookie:outputFormat=Json"),
+                ToLayout("event-properties:cookies", "event-properties:Cookies"));
             TrySetLayout(
                 v => FormLayout = v,
-                "${event-properties:form:whenEmpty=${event-properties:Form:whenEmpty=${aspnet-request-form:outputFormat=Json}}}",
-                "${event-properties:form:whenEmpty=${event-properties:Form}}");
+                ToLayout("event-properties:form", "event-properties:Form", "aspnet-request-form:outputFormat=Json"),
+                ToLayout("event-properties:form", "event-properties:Form"));
             TrySetLayout(
                 v => QueryStringLayout = v,
-                "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString:whenEmpty=${aspnet-request-querystring:outputFormat=Json}}}}",
-                "${event-properties:querystring:whenEmpty=${event-properties:queryString:whenEmpty=${event-properties:QueryString}}}");
+                ToLayout(
+                    "event-properties:querystring", "event-properties:queryString", "event-properties:QueryString", "event-properties:Querystring",
+                    "aspnet-request-querystring:outputFormat=Json"),
+                ToLayout(
+                    "event-properties:querystring", "event-properties:queryString", "event-properties:QueryString", "event-properties:Querystring"));
             TrySetLayout(
                 v => HeadersLayout = v,
-                "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables:whenEmpty=${aspnet-request-headers:outputFormat=Json}}}}",
-                "${event-properties:servervariables:whenEmpty=${event-properties:serverVariables:whenEmpty=${event-properties:ServerVariables}}}");
-            SourceLayout = "${event-properties:source:whenEmpty=${event-properties:Source:whenEmpty=${logger}}}";
-            ApplicationLayout = "${event-properties:application:whenEmpty=${event-properties:Application}}";
+                ToLayout(
+                    "event-properties:servervariables", "event-properties:serverVariables", "event-properties:ServerVariables", "event-properties:Servervariables",
+                    "aspnet-request-headers:outputFormat=Json"),
+                ToLayout(
+                    "event-properties:servervariables", "event-properties:serverVariables", "event-properties:ServerVariables", "event-properties:Servervariables"));
+            SourceLayout = ToLayout(
+                "event-properties:source", "event-properties:Source",
+                "mdc:source", "mdc:Source",
+                "mdlc:source", "mdlc:Source",
+                "gdc:source", "gdc:Source",
+                "logger");
+            ApplicationLayout = ToLayout(
+                "event-properties:application", "event-properties:Application",
+                "mdc:application", "mdc:Application",
+                "mdlc:application", "mdlc:Application",
+                "gdc:application", "gdc:Application");
 #if NET45
             TrySetLayout(
                 v => UserLayout = v,
-                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${identity:authType=false:isAuthenticated=false}}}}",
-                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${identity:authType=false:isAuthenticated=false}}}");
+                ToLayout(
+                    "event-properties:user", "event-properties:User",
+                    "mdc:user", "mdc:User",
+                    "mdlc:user", "mdlc:User",
+                    "gdc:user", "gdc:User",
+                    "aspnet-user-identity", "identity:authType=false:isAuthenticated=false"),
+                ToLayout(
+                    "event-properties:user", "event-properties:User",
+                    "mdc:user", "mdc:User",
+                    "mdlc:user", "mdlc:User",
+                    "gdc:user", "gdc:User",
+                    "identity:authType=false:isAuthenticated=false"));
 #else
             TrySetLayout(
                 v => UserLayout = v,
-                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${aspnet-user-identity:whenEmpty=${environment-user}}}}",
-                "${event-properties:user:whenEmpty=${event-properties:User:whenEmpty=${environment-user}}}");
+                ToLayout(
+                    "event-properties:user", "event-properties:User",
+                    "mdc:user", "mdc:User",
+                    "mdlc:user", "mdlc:User",
+                    "gdc:user", "gdc:User",
+                    "aspnet-user-identity", "environment-user"),
+                ToLayout(
+                    "event-properties:user", "event-properties:User",
+                    "mdc:user", "mdc:User",
+                    "mdlc:user", "mdlc:User",
+                    "gdc:user", "gdc:User",
+                    "environment-user"));
 #endif
             TrySetLayout(
                 v => MethodLayout = v,
-                "${event-properties:method:whenEmpty=${event-properties:Method:whenEmpty=${aspnet-request-method}}}",
-                "${event-properties:method:whenEmpty=${event-properties:Method}}");
-            VersionLayout = "${event-properties:version:whenEmpty=${event-properties:Version}}";
+                ToLayout(
+                    "event-properties:method", "event-properties:Method",
+                    "mdc:method", "mdc:Method",
+                    "mdlc:method", "mdlc:Method",
+                    "gdc:method", "gdc:Method",
+                    "aspnet-request-method"),
+                ToLayout(
+                    "event-properties:method", "event-properties:Method",
+                    "mdc:method", "mdc:Method",
+                    "mdlc:method", "mdlc:Method",
+                    "gdc:method", "gdc:Method"));
+            VersionLayout = ToLayout("event-properties:version", "event-properties:Version");
             TrySetLayout(
                 v => UrlLayout = v,
-                "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL:whenEmpty=${aspnet-request-url}}}}",
-                "${event-properties:url:whenEmpty=${event-properties:Url:whenEmpty=${event-properties:URL}}}");
-            TypeLayout = "${event-properties:type:whenEmpty=${event-properties:Type}}";
+                ToLayout(
+                    "event-properties:url", "event-properties:Url", "event-properties:URL",
+                    "mdc:url", "mdc:Url", "mdc:URL",
+                    "mdlc:url", "mdlc:Url", "mdlc:URL",
+                    "gdc:url", "gdc:Url", "gdc:URL",
+                    "aspnet-request-url"),
+                ToLayout(
+                    "event-properties:url", "event-properties:Url", "event-properties:URL",
+                    "mdc:url", "mdc:Url", "mdc:URL",
+                    "mdlc:url", "mdlc:Url", "mdlc:URL",
+                    "gdc:url", "gdc:Url", "gdc:URL"));
+            TypeLayout = ToLayout(
+                "event-properties:type", "event-properties:Type",
+                "mdc:type", "mdc:Type",
+                "mdlc:type", "mdlc:Type",
+                "gdc:type", "gdc:Type");
             TrySetLayout(
                 v => StatusCodeLayout = v,
-                "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode:whenEmpty=${aspnet-response-statuscode}}}}}",
-                "${event-properties:statuscode:whenEmpty=${event-properties:Statuscode:whenEmpty=${event-properties:statusCode:whenEmpty=${event-properties:StatusCode}}}}");
+                ToLayout(
+                    "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
+                    "mdc:statuscode", "mdc:Statuscode", "mdc:statusCode", "mdc:StatusCode",
+                    "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
+                    "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode",
+                    "aspnet-response-statuscode"),
+                ToLayout(
+                    "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
+                    "mdc:statuscode", "mdc:Statuscode", "mdc:statusCode", "mdc:StatusCode",
+                    "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
+                    "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode"));
 
             LogManager.ThrowConfigExceptions = throwConfigExceptions;
             base.InitializeTarget();
+        }
+
+        private static string ToLayout(params string[] names)
+        {
+            string layout = "";
+            for (var i = names.Length - 1; i >= 0; i--)
+            {
+                if (i == names.Length - 1)
+                {
+                    layout = $"${{{names[i]}}}";
+                }
+                else
+                {
+                    layout = $"${{{names[i]}:whenEmpty={layout}}}";
+                }
+            }
+            return layout;
         }
 
         private void TrySetLayout(Action<Layout> layout, string value, string fallback)

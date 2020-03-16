@@ -127,13 +127,11 @@ namespace Elmah.Io.NLog
                 v => HostnameLayout = v,
                 ToLayout(
                     "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
-                    "mdc:hostname", "mdc:Hostname", "mdc:HostName", "mdc:hostName",
                     "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
                     "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
                     "aspnet-request-host", "machinename"),
                 ToLayout(
                     "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
-                    "mdc:hostname", "mdc:Hostname", "mdc:HostName", "mdc:hostName",
                     "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
                     "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
                     "machinename"));
@@ -161,13 +159,11 @@ namespace Elmah.Io.NLog
                     "event-properties:servervariables", "event-properties:serverVariables", "event-properties:ServerVariables", "event-properties:Servervariables"));
             SourceLayout = ToLayout(
                 "event-properties:source", "event-properties:Source",
-                "mdc:source", "mdc:Source",
                 "mdlc:source", "mdlc:Source",
                 "gdc:source", "gdc:Source",
                 "logger");
             ApplicationLayout = ToLayout(
                 "event-properties:application", "event-properties:Application",
-                "mdc:application", "mdc:Application",
                 "mdlc:application", "mdlc:Application",
                 "gdc:application", "gdc:Application");
 #if NET45
@@ -175,13 +171,11 @@ namespace Elmah.Io.NLog
                 v => UserLayout = v,
                 ToLayout(
                     "event-properties:user", "event-properties:User",
-                    "mdc:user", "mdc:User",
                     "mdlc:user", "mdlc:User",
                     "gdc:user", "gdc:User",
                     "aspnet-user-identity", "identity:authType=false:isAuthenticated=false"),
                 ToLayout(
                     "event-properties:user", "event-properties:User",
-                    "mdc:user", "mdc:User",
                     "mdlc:user", "mdlc:User",
                     "gdc:user", "gdc:User",
                     "identity:authType=false:isAuthenticated=false"));
@@ -190,13 +184,11 @@ namespace Elmah.Io.NLog
                 v => UserLayout = v,
                 ToLayout(
                     "event-properties:user", "event-properties:User",
-                    "mdc:user", "mdc:User",
                     "mdlc:user", "mdlc:User",
                     "gdc:user", "gdc:User",
                     "aspnet-user-identity", "environment-user"),
                 ToLayout(
                     "event-properties:user", "event-properties:User",
-                    "mdc:user", "mdc:User",
                     "mdlc:user", "mdlc:User",
                     "gdc:user", "gdc:User",
                     "environment-user"));
@@ -205,13 +197,11 @@ namespace Elmah.Io.NLog
                 v => MethodLayout = v,
                 ToLayout(
                     "event-properties:method", "event-properties:Method",
-                    "mdc:method", "mdc:Method",
                     "mdlc:method", "mdlc:Method",
                     "gdc:method", "gdc:Method",
                     "aspnet-request-method"),
                 ToLayout(
                     "event-properties:method", "event-properties:Method",
-                    "mdc:method", "mdc:Method",
                     "mdlc:method", "mdlc:Method",
                     "gdc:method", "gdc:Method"));
             VersionLayout = ToLayout("event-properties:version", "event-properties:Version");
@@ -219,31 +209,26 @@ namespace Elmah.Io.NLog
                 v => UrlLayout = v,
                 ToLayout(
                     "event-properties:url", "event-properties:Url", "event-properties:URL",
-                    "mdc:url", "mdc:Url", "mdc:URL",
                     "mdlc:url", "mdlc:Url", "mdlc:URL",
                     "gdc:url", "gdc:Url", "gdc:URL",
                     "aspnet-request-url"),
                 ToLayout(
                     "event-properties:url", "event-properties:Url", "event-properties:URL",
-                    "mdc:url", "mdc:Url", "mdc:URL",
                     "mdlc:url", "mdlc:Url", "mdlc:URL",
                     "gdc:url", "gdc:Url", "gdc:URL"));
             TypeLayout = ToLayout(
                 "event-properties:type", "event-properties:Type",
-                "mdc:type", "mdc:Type",
                 "mdlc:type", "mdlc:Type",
                 "gdc:type", "gdc:Type");
             TrySetLayout(
                 v => StatusCodeLayout = v,
                 ToLayout(
                     "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
-                    "mdc:statuscode", "mdc:Statuscode", "mdc:statusCode", "mdc:StatusCode",
                     "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
                     "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode",
                     "aspnet-response-statuscode"),
                 ToLayout(
                     "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
-                    "mdc:statuscode", "mdc:Statuscode", "mdc:statusCode", "mdc:StatusCode",
                     "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
                     "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode"));
 

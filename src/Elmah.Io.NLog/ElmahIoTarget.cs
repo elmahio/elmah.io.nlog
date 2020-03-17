@@ -120,9 +120,6 @@ namespace Elmah.Io.NLog
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
 
-            var throwConfigExceptions = LogManager.ThrowConfigExceptions;
-            LogManager.ThrowConfigExceptions = true;
-
             TrySetLayout(
                 v => HostnameLayout = v,
                 ToLayout(
@@ -232,7 +229,6 @@ namespace Elmah.Io.NLog
                     "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
                     "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode"));
 
-            LogManager.ThrowConfigExceptions = throwConfigExceptions;
             base.InitializeTarget();
         }
 
@@ -257,13 +253,12 @@ namespace Elmah.Io.NLog
         {
             try
             {
-                layout(value);
+                layout(Layout.FromString(value, throwConfigExceptions:true));
             }
-            catch (ArgumentException)
+            catch (NLogConfigurationException)
             {
                 layout(fallback);
             }
-
         }
 
         protected override Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)

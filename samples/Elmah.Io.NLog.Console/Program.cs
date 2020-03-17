@@ -47,6 +47,7 @@ namespace Elmah.Io.NLog.Console
                 new Dictionary<string, string> { { "id", "42" } });
 
             // Flushes and closes all targets (recommended to call this just before application exit)
+            System.Console.ReadKey();
             LogManager.Shutdown();
         }
     }

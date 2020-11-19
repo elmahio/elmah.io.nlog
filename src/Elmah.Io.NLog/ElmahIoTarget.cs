@@ -407,11 +407,16 @@ namespace Elmah.Io.NLog
 
         private List<Item> PropertiesToData(LogEventInfo logEvent)
         {
+            var items = new List<Item>();
+            if (logEvent.Exception != null)
+            {
+                items.AddRange(logEvent.Exception.ToDataList());
+            }
+
             if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0) return null;
 
             var properties = GetAllProperties(logEvent);
 
-            var items = new List<Item>();
             StringBuilder sb = new StringBuilder();
             var valueFormatter = ConfigurationItemFactory.Default.ValueFormatter;
             foreach (var obj in properties)

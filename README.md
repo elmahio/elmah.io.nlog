@@ -1,6 +1,5 @@
-# elmah.io.nlog
+# Elmah.Io.NLog
 
-[![Build status](https://ci.appveyor.com/api/projects/status/github/elmahio/elmah.io.nlog?svg=true)](https://ci.appveyor.com/project/ThomasArdal/elmah-io-nlog)
-[![NuGet](https://img.shields.io/nuget/vpre/elmah.io.nlog.svg)](https://www.nuget.org/packages/elmah.io.nlog)
+Log to [elmah.io](https://elmah.io/) from NLog.
 
-[Documentation](https://docs.elmah.io/logging-to-elmah-io-from-nlog/)
+Documentation: [Logging to elmah.io from NLog](https://docs.elmah.io/logging-to-elmah-io-from-nlog/)

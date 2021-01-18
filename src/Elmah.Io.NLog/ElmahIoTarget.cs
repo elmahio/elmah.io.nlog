@@ -101,6 +101,8 @@ namespace Elmah.Io.NLog
 
         public Layout StatusCodeLayout { get; set; }
 
+        public Layout CorrelationIdLayout { get; set; }
+
         public ElmahIoTarget()
         {
             DefaultLayout = Layout?.ToString();
@@ -202,6 +204,10 @@ namespace Elmah.Io.NLog
                     "mdlc:method", "mdlc:Method",
                     "gdc:method", "gdc:Method"));
             VersionLayout = ToLayout("event-properties:version", "event-properties:Version");
+            CorrelationIdLayout = ToLayout(
+                "event-properties:correlationid", "event-properties:correlationId", "event-properties:CorrelationId", "event-properties:CorrelationID",
+                "mdlc:correlationid", "mdlc:correlationId", "mdlc:CorrelationId", "mdlc:CorrelationID",
+                "gdc:correlationid", "gdc:correlationId", "gdc:CorrelationId", "gdc:CorrelationID");
             TrySetLayout(
                 v => UrlLayout = v,
                 ToLayout(
@@ -311,6 +317,7 @@ namespace Elmah.Io.NLog
                     Url = Url(logEvent),
                     Type = Type(logEvent),
                     StatusCode = StatusCode(logEvent),
+                    CorrelationId = RenderLogEvent(CorrelationIdLayout, logEvent),
                     ServerVariables = RenderItems(logEvent, HeadersLayout),
                     Cookies = RenderItems(logEvent, CookieLayout),
                     Form = RenderItems(logEvent, FormLayout),

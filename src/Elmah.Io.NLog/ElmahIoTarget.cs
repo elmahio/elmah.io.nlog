@@ -71,6 +71,7 @@ namespace Elmah.Io.NLog
 
         public Func<CreateMessage, bool> OnFilter { get; set; }
 
+        [Obsolete("Application name should be set through either event properties, an NLog context, or with an OnMessage action.")]
         public string Application { get => (ApplicationLayout as SimpleLayout)?.Text; set => ApplicationLayout = value; }
 
         public IWebProxy WebProxy { get; set; }

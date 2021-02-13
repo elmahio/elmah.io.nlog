@@ -203,7 +203,10 @@ namespace Elmah.Io.NLog
                     "event-properties:method", "event-properties:Method",
                     "mdlc:method", "mdlc:Method",
                     "gdc:method", "gdc:Method"));
-            VersionLayout = ToLayout("event-properties:version", "event-properties:Version");
+            VersionLayout = ToLayout(
+                "event-properties:version", "event-properties:Version",
+                "mdlc:version", "mdlc:Version",
+                "gdc:version", "gdc:Version");
             CorrelationIdLayout = ToLayout(
                 "event-properties:correlationid", "event-properties:correlationId", "event-properties:CorrelationId", "event-properties:CorrelationID",
                 "mdlc:correlationid", "mdlc:correlationId", "mdlc:CorrelationId", "mdlc:CorrelationID",

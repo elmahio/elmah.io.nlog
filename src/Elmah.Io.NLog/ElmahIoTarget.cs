@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Elmah.Io.Client;
-using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Common;
 using NLog.Config;

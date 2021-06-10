@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Elmah.Io.Client;
-using Elmah.Io.Client.Models;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -15,15 +14,15 @@ namespace Elmah.Io.NLog.Tests
     public class ElmahIoTargetTest
     {
         IElmahioAPI clientMock;
-        IMessages messagesMock;
+        IMessagesClient messagesClientMock;
         Logger logger;
 
         [SetUp]
         public void SetUp()
         {
             clientMock = Substitute.For<IElmahioAPI>();
-            messagesMock = Substitute.For<IMessages>();
-            clientMock.Messages.Returns(messagesMock);
+            messagesClientMock = Substitute.For<IMessagesClient>();
+            clientMock.Messages.Returns(messagesClientMock);
             var target = new ElmahIoTarget(clientMock)
             {
                 ApiKey = "ApiKey",
@@ -47,7 +46,7 @@ namespace Elmah.Io.NLog.Tests
         {
             // Arrange
             CreateMessage loggedMessage = null;
-            messagesMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg));
+            messagesClientMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg));
 
             // Act
             logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {correlationId} {serverVariables} {cookies} {form} {queryString}",
@@ -97,7 +96,7 @@ namespace Elmah.Io.NLog.Tests
         {
             // Arrange
             CreateMessage loggedMessage = null;
-            messagesMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg));
+            messagesClientMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg));
 
             // Act
             var logEventInfo = new LogEventInfo(LogLevel.Warn, "", "Warning");
@@ -127,7 +126,7 @@ namespace Elmah.Io.NLog.Tests
         {
             // Arrange
             IList<CreateMessage> loggedMessages = null;
-            messagesMock.CreateBulkAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<IList<CreateMessage>>(msgs => loggedMessages = msgs));
+            messagesClientMock.CreateBulkAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<IList<CreateMessage>>(msgs => loggedMessages = msgs));
             var elmahTarget = LogManager.Configuration.AllTargets.OfType<ElmahIoTarget>().FirstOrDefault();
             elmahTarget?.ContextProperties?.Add(new TargetPropertyWithContext("ThreadId", "${threadid}"));
             LogManager.ReconfigExistingLoggers();

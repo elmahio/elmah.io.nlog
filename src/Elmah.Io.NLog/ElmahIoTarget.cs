@@ -279,7 +279,7 @@ namespace Elmah.Io.NLog
         {
             if (_client == null)
             {
-                var api = (ElmahioAPI)ElmahioAPI.Create(ApiKey, new ElmahIoOptions
+                var api = ElmahioAPI.Create(ApiKey, new ElmahIoOptions
                 {
                     WebProxy = WebProxy
                 });

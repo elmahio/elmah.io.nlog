@@ -25,8 +25,10 @@ namespace Elmah.Io.NLog
     {
 #if NETSTANDARD
         internal static string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        internal static string _nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 #else
         internal static string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
+        internal static string _nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
 #endif
 
         private IElmahioAPI _client;
@@ -285,6 +287,7 @@ namespace Elmah.Io.NLog
                 });
                 api.HttpClient.Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30));
                 api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));
+                api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", _nlogAssemblyVersion)));
                 api.Messages.OnMessage += (sender, args) =>
                 {
                     OnMessage?.Invoke(args.Message);

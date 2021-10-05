@@ -319,11 +319,10 @@ namespace Elmah.Io.NLog
             {
                 var api = ElmahioAPI.Create(ApiKey, new ElmahIoOptions
                 {
-                    WebProxy = WebProxy
+                    WebProxy = WebProxy,
+                    Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30)),
+                    UserAgent = UserAgent(),
                 });
-                api.HttpClient.Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30));
-                api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)));
-                api.HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", _nlogAssemblyVersion)));
                 api.Messages.OnMessage += (sender, args) =>
                 {
                     OnMessage?.Invoke(args.Message);
@@ -497,6 +496,15 @@ namespace Elmah.Io.NLog
             if (level == LogLevel.Trace) return nameof(Severity.Verbose);
             if (level == LogLevel.Warn) return nameof(Severity.Warning);
             return nameof(Severity.Information);
+        }
+
+        private static string UserAgent()
+        {
+            return new StringBuilder()
+                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)).ToString())
+                .Append(" ")
+                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", _nlogAssemblyVersion)).ToString())
+                .ToString();
         }
     }
 }

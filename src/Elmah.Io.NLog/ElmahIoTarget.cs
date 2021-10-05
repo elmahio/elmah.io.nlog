@@ -20,6 +20,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Elmah.Io.NLog
 {
+    /// <summary>
+    /// NLog target for storing log messages in elmah.io.
+    /// </summary>
     [Target("elmah.io")]
     public class ElmahIoTarget : AsyncTaskTarget
     {
@@ -37,6 +40,9 @@ namespace Elmah.Io.NLog
         private Guid _logId;
         private string _apiKey;
 
+        /// <summary>
+        /// The API key from the elmah.io UI.
+        /// </summary>
         [RequiredParameter]
         public string ApiKey
         {
@@ -51,7 +57,11 @@ namespace Elmah.Io.NLog
             }
         }
 
-        // Needs to be a string and not a guid, in order for .NET core to work
+        // The following LogId property is declared as a string and not a guid for .NET core to work
+
+        /// <summary>
+        /// The id of the log to send messages to.
+        /// </summary>
         [RequiredParameter]
         public string LogId
         {
@@ -66,11 +76,25 @@ namespace Elmah.Io.NLog
             }
         }
 
+        /// <summary>
+        /// Register an action to be called before logging an error. Use the OnMessage action to
+        /// decorate error messages with additional information.
+        /// </summary>
         public Action<CreateMessage> OnMessage { get; set; }
 
+        /// <summary>
+        /// Register an action to be called if communicating with the elmah.io API fails.
+        /// You can use this callback to log the error somewhere else in case an error happens.
+        /// </summary>
         public Action<CreateMessage, Exception> OnError { get; set; }
 
+        /// <summary>
+        /// Register an action to filter log messages. Use this to add client-side ignore
+        /// of some error messages. If the filter action returns true, the error is ignored.
+        /// </summary>
         public Func<CreateMessage, bool> OnFilter { get; set; }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
         [Obsolete("Application name should be set through either event properties, an NLog context, or with an OnMessage action.")]
         public string Application { get => (ApplicationLayout as SimpleLayout)?.Text; set => ApplicationLayout = value; }
@@ -105,6 +129,11 @@ namespace Elmah.Io.NLog
 
         public Layout CorrelationIdLayout { get; set; }
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+        /// <summary>
+        /// Create a new target with default values.
+        /// </summary>
         public ElmahIoTarget()
         {
             DefaultLayout = Layout?.ToString();
@@ -115,11 +144,16 @@ namespace Elmah.Io.NLog
             BatchSize = 50;             // Avoid too many messages in a single batch (reduce request size)
         }
 
+        /// <summary>
+        /// Create a new target with a preconfigured IElmahioAPI client. You mostly want to create
+        /// the elmah.io target through either NLog.config or using the default constructor.
+        /// </summary>
         public ElmahIoTarget(IElmahioAPI client) : this()
         {
             _client = client;
         }
 
+        /// <inheritdoc/>
         protected override void InitializeTarget()
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
@@ -272,11 +306,13 @@ namespace Elmah.Io.NLog
             }
         }
 
+        /// <inheritdoc/>
         protected override Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();    // Never reached, because of override of IList-handler
+            throw new NotImplementedException(); // Never reached, because of override of IList-handler
         }
 
+        /// <inheritdoc/>
         protected override Task WriteAsyncTask(IList<LogEventInfo> logEvents, CancellationToken cancellationToken)
         {
             if (_client == null)

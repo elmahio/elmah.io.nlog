@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28922.388
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9551B75-108D-4F94-B607-23E1A34DB497}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.ConsoleCore", "samples\Elmah.Io.NLog.ConsoleCore\Elmah.Io.NLog.ConsoleCore.csproj", "{D0CE628C-66D4-4EA6-92EE-87A6DB99995A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.AspNetCore31", "samples\Elmah.Io.NLog.AspNetCore31\Elmah.Io.NLog.AspNetCore31.csproj", "{1DB208B9-7485-478E-8B45-9250FE302826}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.AspNetCore60", "samples\Elmah.Io.NLog.AspNetCore60\Elmah.Io.NLog.AspNetCore60.csproj", "{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{1DB208B9-7485-478E-8B45-9250FE302826}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DB208B9-7485-478E-8B45-9250FE302826}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DB208B9-7485-478E-8B45-9250FE302826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +67,7 @@ Global
 		{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA} = {873FAF29-B362-452A-90EA-19F3FC3AD4CE}
 		{D0CE628C-66D4-4EA6-92EE-87A6DB99995A} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 		{1DB208B9-7485-478E-8B45-9250FE302826} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
+		{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49} = {A7B51FCD-7D58-4F9F-A2AF-7B2F28F5A098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EB25BF6B-30A4-4F37-AFBC-F4318A1516C9}

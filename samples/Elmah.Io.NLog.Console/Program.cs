@@ -23,9 +23,11 @@ namespace Elmah.Io.NLog.Console
             infoMessage.Properties.Add("Some list", new[] { 1, 2, 3 });
             log.Info(infoMessage);
 
-            // Decorate all log messages in this thread with a custom property
-            MappedDiagnosticsContext.Set("application", "Thread app");
-            log.Trace("This is a trace message");
+            // Decorate all log messages within this scope with a custom property
+            using (log.PushScopeProperty("application", "Thread app"))
+            {
+                log.Trace("This is a trace message");
+            }
 
             // Example of using structured logging. {user} will go into the User field on elmah.io
             log.Info("This is info with some structured logging: {quote} from {user}", "Hasta la vista, baby", "Arnold Schwarzenegger");

@@ -68,10 +68,5 @@
       <Name>Elmah.Io.NLog</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NLog">
-      <Version>5.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

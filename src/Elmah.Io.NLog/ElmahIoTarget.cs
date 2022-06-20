@@ -24,6 +24,8 @@ namespace Elmah.Io.NLog
     /// NLog target for storing log messages in elmah.io.
     /// </summary>
     [Target("elmah.io")]
+    [Target("elmah-io")]
+    [Target("ElmahIo")]
     public class ElmahIoTarget : AsyncTaskTarget
     {
 #if NETSTANDARD
@@ -466,7 +468,7 @@ namespace Elmah.Io.NLog
             var properties = GetAllProperties(logEvent);
 
             StringBuilder sb = new StringBuilder();
-            var valueFormatter = ConfigurationItemFactory.Default.ValueFormatter;
+            var valueFormatter = ResolveService<IValueFormatter>();
             foreach (var obj in properties)
             {
                 if (obj.Value != null)

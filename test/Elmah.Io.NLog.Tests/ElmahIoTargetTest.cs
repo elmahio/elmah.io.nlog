@@ -27,7 +27,7 @@ namespace Elmah.Io.NLog.Tests
             {
                 ApiKey = "ApiKey",
                 LogId = Guid.NewGuid().ToString(),
-                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}",
+                Layout = "${longdate}|${level:uppercase=true}|${logger}|${message:withexception=true}",
             };
 
             var config = new LoggingConfiguration();

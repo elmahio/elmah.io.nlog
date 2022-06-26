@@ -159,119 +159,52 @@ namespace Elmah.Io.NLog
 
             TrySetLayout(
                 v => HostnameLayout = v,
-                ToLayout(
-                    "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
-                    "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
-                    "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
-                    "aspnet-request-host", "machinename"),
-                ToLayout(
-                    "event-properties:hostname", "event-properties:Hostname", "event-properties:HostName", "event-properties:hostName",
-                    "mdlc:hostname", "mdlc:Hostname", "mdlc:HostName", "mdlc:hostName",
-                    "gdc:hostname", "gdc:Hostname", "gdc:HostName", "gdc:hostName",
-                    "machinename"));
+                ToLayout("event-properties:hostname", "scopeproperty:hostname", "gdc:hostname", "aspnet-request-host", "machinename"),
+                ToLayout("event-properties:hostname", "scopeproperty:hostname", "gdc:hostname", "machinename"));
             TrySetLayout(
                 v => CookieLayout = v,
-                ToLayout("event-properties:cookies", "event-properties:Cookies", "aspnet-request-cookie:outputFormat=Json"),
-                ToLayout("event-properties:cookies", "event-properties:Cookies"));
+                ToLayout("event-properties:cookies", "aspnet-request-cookie:outputFormat=Json"),
+                ToLayout("event-properties:cookies"));
             TrySetLayout(
                 v => FormLayout = v,
-                ToLayout("event-properties:form", "event-properties:Form", "aspnet-request-form:outputFormat=Json"),
-                ToLayout("event-properties:form", "event-properties:Form"));
+                ToLayout("event-properties:form", "aspnet-request-form:outputFormat=Json"),
+                ToLayout("event-properties:form"));
             TrySetLayout(
                 v => QueryStringLayout = v,
-                ToLayout(
-                    "event-properties:querystring", "event-properties:queryString", "event-properties:QueryString", "event-properties:Querystring",
-                    "aspnet-request-querystring:outputFormat=Json"),
-                ToLayout(
-                    "event-properties:querystring", "event-properties:queryString", "event-properties:QueryString", "event-properties:Querystring"));
+                ToLayout("event-properties:querystring", "aspnet-request-querystring:outputFormat=Json"),
+                ToLayout("event-properties:querystring"));
             TrySetLayout(
                 v => HeadersLayout = v,
-                ToLayout(
-                    "event-properties:servervariables", "event-properties:serverVariables", "event-properties:ServerVariables", "event-properties:Servervariables",
-                    "aspnet-request-headers:outputFormat=Json"),
-                ToLayout(
-                    "event-properties:servervariables", "event-properties:serverVariables", "event-properties:ServerVariables", "event-properties:Servervariables"));
-            SourceLayout = ToLayout(
-                "event-properties:source", "event-properties:Source",
-                "mdlc:source", "mdlc:Source",
-                "gdc:source", "gdc:Source",
-                "logger");
-            ApplicationLayout = ToLayout(
-                "event-properties:application", "event-properties:Application",
-                "mdlc:application", "mdlc:Application",
-                "gdc:application", "gdc:Application");
+                ToLayout("event-properties:servervariables", "aspnet-request-headers:outputFormat=Json"),
+                ToLayout("event-properties:servervariables"));
+            SourceLayout = ToLayout("event-properties:source", "scopeproperty:source", "gdc:source", "logger");
+            ApplicationLayout = ToLayout("event-properties:application", "scopeproperty:application", "gdc:application");
 #if NET45
             TrySetLayout(
                 v => UserLayout = v,
-                ToLayout(
-                    "event-properties:user", "event-properties:User",
-                    "mdlc:user", "mdlc:User",
-                    "gdc:user", "gdc:User",
-                    "aspnet-user-identity", "identity:authType=false:isAuthenticated=false"),
-                ToLayout(
-                    "event-properties:user", "event-properties:User",
-                    "mdlc:user", "mdlc:User",
-                    "gdc:user", "gdc:User",
-                    "identity:authType=false:isAuthenticated=false"));
+                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "aspnet-user-identity", "identity:authType=false:isAuthenticated=false"),
+                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "identity:authType=false:isAuthenticated=false"));
 #else
             TrySetLayout(
                 v => UserLayout = v,
-                ToLayout(
-                    "event-properties:user", "event-properties:User",
-                    "mdlc:user", "mdlc:User",
-                    "gdc:user", "gdc:User",
-                    "aspnet-user-identity", "environment-user"),
-                ToLayout(
-                    "event-properties:user", "event-properties:User",
-                    "mdlc:user", "mdlc:User",
-                    "gdc:user", "gdc:User",
-                    "environment-user"));
+                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "aspnet-user-identity", "environment-user"),
+                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "environment-user"));
 #endif
             TrySetLayout(
                 v => MethodLayout = v,
-                ToLayout(
-                    "event-properties:method", "event-properties:Method",
-                    "mdlc:method", "mdlc:Method",
-                    "gdc:method", "gdc:Method",
-                    "aspnet-request-method"),
-                ToLayout(
-                    "event-properties:method", "event-properties:Method",
-                    "mdlc:method", "mdlc:Method",
-                    "gdc:method", "gdc:Method"));
-            VersionLayout = ToLayout(
-                "event-properties:version", "event-properties:Version",
-                "mdlc:version", "mdlc:Version",
-                "gdc:version", "gdc:Version");
-            CorrelationIdLayout = ToLayout(
-                "event-properties:correlationid", "event-properties:correlationId", "event-properties:CorrelationId", "event-properties:CorrelationID",
-                "mdlc:correlationid", "mdlc:correlationId", "mdlc:CorrelationId", "mdlc:CorrelationID",
-                "gdc:correlationid", "gdc:correlationId", "gdc:CorrelationId", "gdc:CorrelationID");
+                ToLayout("event-properties:method", "scopeproperty:method", "gdc:method", "aspnet-request-method"),
+                ToLayout("event-properties:method", "scopeproperty:method", "gdc:method"));
+            VersionLayout = ToLayout("event-properties:version", "scopeproperty:version", "gdc:version");
+            CorrelationIdLayout = ToLayout("event-properties:correlationid", "scopeproperty:correlationid", "gdc:correlationid");
             TrySetLayout(
                 v => UrlLayout = v,
-                ToLayout(
-                    "event-properties:url", "event-properties:Url", "event-properties:URL",
-                    "mdlc:url", "mdlc:Url", "mdlc:URL",
-                    "gdc:url", "gdc:Url", "gdc:URL",
-                    "aspnet-request-url"),
-                ToLayout(
-                    "event-properties:url", "event-properties:Url", "event-properties:URL",
-                    "mdlc:url", "mdlc:Url", "mdlc:URL",
-                    "gdc:url", "gdc:Url", "gdc:URL"));
-            TypeLayout = ToLayout(
-                "event-properties:type", "event-properties:Type",
-                "mdlc:type", "mdlc:Type",
-                "gdc:type", "gdc:Type");
+                ToLayout("event-properties:url", "scopeproperty:url", "gdc:url", "aspnet-request-url"),
+                ToLayout("event-properties:url", "scopeproperty:url", "gdc:url"));
+            TypeLayout = ToLayout("event-properties:type", "scopeproperty:type", "gdc:type");
             TrySetLayout(
                 v => StatusCodeLayout = v,
-                ToLayout(
-                    "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
-                    "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
-                    "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode",
-                    "aspnet-response-statuscode"),
-                ToLayout(
-                    "event-properties:statuscode", "event-properties:Statuscode", "event-properties:statusCode", "event-properties:StatusCode",
-                    "mdlc:statuscode", "mdlc:Statuscode", "mdlc:statusCode", "mdlc:StatusCode",
-                    "gdc:statuscode", "gdc:Statuscode", "gdc:statusCode", "gdc:StatusCode"));
+                ToLayout("event-properties:statuscode", "scopeproperty:statuscode", "gdc:statuscode", "aspnet-response-statuscode"),
+                ToLayout("event-properties:statuscode", "scopeproperty:statuscode", "gdc:statuscode"));
 
             base.InitializeTarget();
         }

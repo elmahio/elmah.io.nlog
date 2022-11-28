@@ -4,7 +4,7 @@ using NLog.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
-namespace Elmah.Io.NLog.ConsoleCore
+namespace Elmah.Io.NLog.ConsoleCore31
 {
     class Program
     {

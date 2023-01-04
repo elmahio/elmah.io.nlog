@@ -304,7 +304,7 @@ namespace Elmah.Io.NLog
 
                 if (logEvents.Count == 1)
                 {
-                    return _client.Messages.CreateAndNotifyAsync(_logId, message);
+                    return _client.Messages.CreateAndNotifyAsync(_logId, message, cancellationToken);
                 }
 
                 messages = messages ?? new List<CreateMessage>(logEvents.Count);
@@ -313,7 +313,7 @@ namespace Elmah.Io.NLog
 
             if (messages?.Count > 0)
             {
-                return _client.Messages.CreateBulkAndNotifyAsync(_logId, messages);
+                return _client.Messages.CreateBulkAndNotifyAsync(_logId, messages, cancellationToken);
             }
 
             return Task.FromResult<Message>(null);

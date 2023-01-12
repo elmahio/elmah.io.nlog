@@ -50,7 +50,7 @@ namespace Elmah.Io.NLog.Tests
             messagesClientMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg), Arg.Any<CancellationToken>());
 
             // Act
-            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {correlationId} {serverVariables} {cookies} {form} {queryString}",
+            logger.Info("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {correlationId} {category} {serverVariables} {cookies} {form} {queryString}",
                 HttpMethod.Get,
                 "1.0.0",
                 new Uri("http://a.b/"),
@@ -61,6 +61,7 @@ namespace Elmah.Io.NLog.Tests
                 "The hostname",
                 "The application",
                 "The correlationId",
+                "The category",
                 new Dictionary<string, string> { { "serverVariableKey", "serverVariableValue" } },
                 new Dictionary<string, string> { { "cookieKey", "cookieValue" } },
                 new Dictionary<string, string> { { "formKey", "formValue" } },
@@ -74,8 +75,8 @@ namespace Elmah.Io.NLog.Tests
 
             // Assert
             Assert.That(loggedMessage, Is.Not.Null);
-            Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\" \"The correlationId\" \"serverVariableKey\"=\"serverVariableValue\" \"cookieKey\"=\"cookieValue\" \"formKey\"=\"formValue\" \"queryStringKey\"=\"queryStringValue\""));
-            Assert.That(loggedMessage.TitleTemplate, Is.EqualTo("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {correlationId} {serverVariables} {cookies} {form} {queryString}"));
+            Assert.That(loggedMessage.Title, Is.EqualTo("Info message GET \"1.0.0\" http://a.b/ \"Mal\" \"System.NullReferenceException\" 404 \"The source\" \"The hostname\" \"The application\" \"The correlationId\" \"The category\" \"serverVariableKey\"=\"serverVariableValue\" \"cookieKey\"=\"cookieValue\" \"formKey\"=\"formValue\" \"queryStringKey\"=\"queryStringValue\""));
+            Assert.That(loggedMessage.TitleTemplate, Is.EqualTo("Info message {method} {version} {url} {user} {type} {statusCode} {source} {hostname} {application} {correlationId} {category} {serverVariables} {cookies} {form} {queryString}"));
             Assert.That(loggedMessage.Method, Is.EqualTo("GET"));
             Assert.That(loggedMessage.Version, Is.EqualTo("1.0.0"));
             Assert.That(loggedMessage.Url, Is.EqualTo("/"));
@@ -86,10 +87,32 @@ namespace Elmah.Io.NLog.Tests
             Assert.That(loggedMessage.Hostname, Is.EqualTo("The hostname"));
             Assert.That(loggedMessage.Application, Is.EqualTo("The application"));
             Assert.That(loggedMessage.CorrelationId, Is.EqualTo("The correlationId"));
+            Assert.That(loggedMessage.Category, Is.EqualTo("The category"));
             Assert.That(loggedMessage.ServerVariables.Any(sv => sv.Key == "serverVariableKey" && sv.Value == "serverVariableValue"));
             Assert.That(loggedMessage.Cookies.Any(sv => sv.Key == "cookieKey" && sv.Value == "cookieValue"));
             Assert.That(loggedMessage.Form.Any(sv => sv.Key == "formKey" && sv.Value == "formValue"));
             Assert.That(loggedMessage.QueryString.Any(sv => sv.Key == "queryStringKey" && sv.Value == "queryStringValue"));
+        }
+
+        [Test]
+        public void CanSetCategoryName()
+        {
+            // Arrange
+            CreateMessage loggedMessage = null;
+            messagesClientMock.CreateAndNotifyAsync(Arg.Any<Guid>(), Arg.Do<CreateMessage>(msg => loggedMessage = msg), Arg.Any<CancellationToken>());
+
+            // Act
+            logger.Info("Info message");
+            for (int i = 0; i < 10; ++i)
+            {
+                if (loggedMessage != null)
+                    break;
+                System.Threading.Thread.Sleep(1000);
+            }
+
+            // Assert
+            Assert.That(loggedMessage, Is.Not.Null);
+            Assert.That(loggedMessage.Category, Is.EqualTo("Test"));
         }
 
         [Test]

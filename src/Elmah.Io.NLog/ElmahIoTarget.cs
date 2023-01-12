@@ -112,6 +112,8 @@ namespace Elmah.Io.NLog
 
         public Layout SourceLayout { get; set; }
 
+        public Layout CategoryLayout { get; set; }
+
         public Layout ApplicationLayout { get; set; }
 
         public Layout UserLayout { get; set; }
@@ -177,7 +179,8 @@ namespace Elmah.Io.NLog
                 v => HeadersLayout = v,
                 ToLayout("event-properties:servervariables", "aspnet-request-headers:outputFormat=Json"),
                 ToLayout("event-properties:servervariables"));
-            SourceLayout = ToLayout("event-properties:source", "scopeproperty:source", "gdc:source", "logger");
+            SourceLayout = ToLayout("event-properties:source", "scopeproperty:source", "gdc:source");
+            CategoryLayout = ToLayout("event-properties:category", "scopeproperty:category", "gdc:category", "logger");
             ApplicationLayout = ToLayout("event-properties:application", "scopeproperty:application", "gdc:application");
 #if NET45
             TrySetLayout(
@@ -291,6 +294,7 @@ namespace Elmah.Io.NLog
                     Type = Type(logEvent),
                     StatusCode = StatusCode(logEvent),
                     CorrelationId = RenderLogEvent(CorrelationIdLayout, logEvent),
+                    Category = RenderLogEvent(CategoryLayout, logEvent),
                     ServerVariables = RenderItems(logEvent, HeadersLayout),
                     Cookies = RenderItems(logEvent, CookieLayout),
                     Form = RenderItems(logEvent, FormLayout),
@@ -340,8 +344,7 @@ namespace Elmah.Io.NLog
         {
             var source = RenderLogEvent(SourceLayout, logEvent);
             if (!string.IsNullOrWhiteSpace(source)) return source;
-            if (logEvent.Exception == null) return logEvent.LoggerName;
-            return logEvent.Exception.GetBaseException().Source;
+            return logEvent.Exception?.GetBaseException().Source;
         }
 
         private IList<Item> RenderItems(LogEventInfo logEvent, Layout layout)

@@ -13,7 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog", "src\Elmah.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2D2A563-08A0-4B2A-9D31-820045C2357B}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build.yml = .github\workflows\build.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -25,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.AspNetCore60"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.Console", "samples\Elmah.Io.NLog.Console\Elmah.Io.NLog.Console.csproj", "{0626A469-C514-4FE0-ADDD-013B6D63AED7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elmah.Io.NLog.Console70", "samples\Elmah.Io.NLog.Console70\Elmah.Io.NLog.Console70.csproj", "{04FFC73A-9927-42FB-AA2C-466A9FCE025B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.Console70", "samples\Elmah.Io.NLog.Console70\Elmah.Io.NLog.Console70.csproj", "{04FFC73A-9927-42FB-AA2C-466A9FCE025B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.ConsoleCore31", "samples\Elmah.Io.NLog.ConsoleCore31\Elmah.Io.NLog.ConsoleCore31.csproj", "{C6543DA3-D5A5-4904-AB7A-DB1A53A28B32}"
 EndProject

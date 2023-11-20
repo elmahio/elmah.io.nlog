@@ -396,7 +396,7 @@ namespace Elmah.Io.NLog
                 items.AddRange(logEvent.Exception.ToDataList());
             }
 
-            if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0) return null;
+            if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0) return items;
 
             var properties = GetAllProperties(logEvent);
 
@@ -420,6 +420,7 @@ namespace Elmah.Io.NLog
                     items.Add(new Item { Key = obj.Key, Value = text });
                 }
             }
+
             return items;
         }
 

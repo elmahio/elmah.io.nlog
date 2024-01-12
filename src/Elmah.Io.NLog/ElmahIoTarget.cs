@@ -29,11 +29,11 @@ namespace Elmah.Io.NLog
     public class ElmahIoTarget : AsyncTaskTarget
     {
 #if NETSTANDARD
-        internal static string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-        internal static string _nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 #else
-        internal static string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
-        internal static string _nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
+        private static readonly string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
+        private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
 #endif
 
         private IElmahioAPI _client;
@@ -350,7 +350,7 @@ namespace Elmah.Io.NLog
         private IList<Item> RenderItems(LogEventInfo logEvent, Layout layout)
         {
             var rendered = RenderLogEvent(layout, logEvent);
-            if (string.IsNullOrWhiteSpace(rendered)) return null;
+            if (string.IsNullOrWhiteSpace(rendered)) return new List<Item>();
             var items = new List<Item>();
             if (rendered.StartsWith("[{") && rendered.EndsWith("}]")) // JSON rendered using a NLog ASP.NET layout renderer
             {
@@ -369,10 +369,10 @@ namespace Elmah.Io.NLog
                 {
                     var keyAndValueSplit = keyAndValue.Split(new[] { "\"=\"" }, StringSplitOptions.None);
                     if (keyAndValueSplit.Length <= 0) continue;
-                    var key = keyAndValueSplit[0]?.TrimStart(new[] { '\"' }).TrimEnd(new[] { '\"' });
+                    var key = keyAndValueSplit[0]?.TrimStart('\"').TrimEnd('\"');
                     if (string.IsNullOrWhiteSpace(key)) continue;
                     string value = null;
-                    if (keyAndValueSplit.Length > 1) value = keyAndValueSplit[1].TrimStart(new[] { '\"' }).TrimEnd(new[] { '\"' });
+                    if (keyAndValueSplit.Length > 1) value = keyAndValueSplit[1].TrimStart('\"').TrimEnd('\"');
                     items.Add(new Item(key, value));
                 }
             }
@@ -407,9 +407,9 @@ namespace Elmah.Io.NLog
                 if (obj.Value != null)
                 {
                     string text;
-                    if (obj.Value is string)
+                    if (obj.Value is string value)
                     {
-                        text = (string)obj.Value;
+                        text = value;
                     }
                     else
                     {

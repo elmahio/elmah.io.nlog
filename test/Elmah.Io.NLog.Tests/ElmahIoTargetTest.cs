@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable S2925 // "Thread.Sleep" should not be used in tests
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -70,7 +71,7 @@ namespace Elmah.Io.NLog.Tests
             {
                 if (loggedMessage != null)
                     break;
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
 
             // Assert
@@ -107,7 +108,7 @@ namespace Elmah.Io.NLog.Tests
             {
                 if (loggedMessage != null)
                     break;
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
 
             // Assert
@@ -131,7 +132,7 @@ namespace Elmah.Io.NLog.Tests
             {
                 if (loggedMessage != null)
                     break;
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
 
             // Assert
@@ -164,19 +165,20 @@ namespace Elmah.Io.NLog.Tests
             {
                 if (loggedMessages != null)
                     break;
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
 
             // Assert
             Assert.That(loggedMessages != null);
             Assert.That(loggedMessages.Count, Is.EqualTo(5));
-            var loggedMessage = loggedMessages.First();
+            var loggedMessage = loggedMessages[0];
             Assert.That(loggedMessage, Is.Not.Null);
             Assert.That(loggedMessage.Severity, Is.EqualTo(Severity.Warning.ToString()));
             Assert.That(loggedMessage.Title, Does.Contain("Hello World"));
             Assert.That(loggedMessage.Data.Count, Is.EqualTo(1));
             Assert.That(loggedMessage.Data.First().Key, Is.EqualTo("ThreadId"));
-            Assert.That(loggedMessage.Data.First().Value, Is.EqualTo(System.Threading.Thread.CurrentThread.ManagedThreadId.ToString()));
+            Assert.That(loggedMessage.Data.First().Value, Is.EqualTo(Environment.CurrentManagedThreadId.ToString()));
         }
     }
 }
+#pragma warning restore S2925 // "Thread.Sleep" should not be used in tests

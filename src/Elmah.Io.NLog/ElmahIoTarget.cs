@@ -258,6 +258,14 @@ namespace Elmah.Io.NLog
                     Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30)),
                     UserAgent = UserAgent(),
                 });
+                api.Messages.OnMessageFilter += (sender, args) =>
+                {
+                    var filter = OnFilter?.Invoke(args.Message);
+                    if (filter.HasValue && filter.Value)
+                    {
+                        args.Filter = true;
+                    }
+                };
                 api.Messages.OnMessage += (sender, args) =>
                 {
                     OnMessage?.Invoke(args.Message);
@@ -300,11 +308,6 @@ namespace Elmah.Io.NLog
                     Form = RenderItems(logEvent, FormLayout),
                     QueryString = RenderItems(logEvent, QueryStringLayout),
                 };
-
-                if (OnFilter != null && OnFilter(message))
-                {
-                    continue;
-                }
 
                 if (logEvents.Count == 1)
                 {

@@ -41,7 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="5.0.5" />
-    <PackageReference Include="Elmah.Io.Client" Version="[5.1.76,6)" />
+    <PackageReference Include="Elmah.Io.Client" Version="[5.2.77-pre,6)" />
   </ItemGroup>
 
   <ItemGroup>

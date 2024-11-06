@@ -17,9 +17,12 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Linq;
 
 namespace Elmah.Io.NLog
 {
+
     /// <summary>
     /// NLog target for storing log messages in elmah.io.
     /// </summary>
@@ -30,9 +33,11 @@ namespace Elmah.Io.NLog
     {
 #if NETSTANDARD
         private static readonly string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string _elmahIoClientVersion = typeof(IElmahioAPI).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 #else
         private static readonly string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
+        private static readonly string _elmahIoClientVersion = typeof(IElmahioAPI).Assembly.GetName().Version.ToString();
         private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
 #endif
 
@@ -210,6 +215,8 @@ namespace Elmah.Io.NLog
                 ToLayout("event-properties:statuscode", "scopeproperty:statuscode", "gdc:statuscode"));
 
             base.InitializeTarget();
+
+            CreateInstallation();
         }
 
         private static string ToLayout(params string[] names)
@@ -250,33 +257,7 @@ namespace Elmah.Io.NLog
         /// <inheritdoc/>
         protected override Task WriteAsyncTask(IList<LogEventInfo> logEvents, CancellationToken cancellationToken)
         {
-            if (_client == null)
-            {
-                var api = ElmahioAPI.Create(ApiKey, new ElmahIoOptions
-                {
-                    WebProxy = WebProxy,
-                    Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30)),
-                    UserAgent = UserAgent(),
-                });
-                api.Messages.OnMessageFilter += (sender, args) =>
-                {
-                    var filter = OnFilter?.Invoke(args.Message);
-                    if (filter.HasValue && filter.Value)
-                    {
-                        args.Filter = true;
-                    }
-                };
-                api.Messages.OnMessage += (sender, args) =>
-                {
-                    OnMessage?.Invoke(args.Message);
-                };
-                api.Messages.OnMessageFail += (sender, args) =>
-                {
-                    InternalLogger.Error(args.Error, "ElmahIoTarget(Name={0}): Error - {1}", Name, args.Message);
-                    OnError?.Invoke(args.Message, args.Error);
-                };
-                _client = api;
-            }
+            EnsureClient();
 
             IList<CreateMessage> messages = null;
             for (int i = 0; i < logEvents.Count; ++i)
@@ -324,6 +305,37 @@ namespace Elmah.Io.NLog
             }
 
             return Task.FromResult<Message>(null);
+        }
+
+        private void EnsureClient()
+        {
+            if (_client == null)
+            {
+                var api = ElmahioAPI.Create(ApiKey, new ElmahIoOptions
+                {
+                    WebProxy = WebProxy,
+                    Timeout = TimeSpan.FromSeconds(Math.Min(TaskTimeoutSeconds, 30)),
+                    UserAgent = UserAgent(),
+                });
+                api.Messages.OnMessageFilter += (sender, args) =>
+                {
+                    var filter = OnFilter?.Invoke(args.Message);
+                    if (filter.HasValue && filter.Value)
+                    {
+                        args.Filter = true;
+                    }
+                };
+                api.Messages.OnMessage += (sender, args) =>
+                {
+                    OnMessage?.Invoke(args.Message);
+                };
+                api.Messages.OnMessageFail += (sender, args) =>
+                {
+                    InternalLogger.Error(args.Error, "ElmahIoTarget(Name={0}): Error - {1}", Name, args.Message);
+                    OnError?.Invoke(args.Message, args.Error);
+                };
+                _client = api;
+            }
         }
 
         private string Url(LogEventInfo logEvent)
@@ -444,6 +456,94 @@ namespace Elmah.Io.NLog
                 .Append(" ")
                 .Append(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", _nlogAssemblyVersion)).ToString())
                 .ToString();
+        }
+
+        private void CreateInstallation()
+        {
+            EnsureClient();
+
+            try
+            {
+                var logger = new LoggerInfo
+                {
+                    Type = "Elmah.Io.NLog",
+                    Properties =
+                    [
+                        new Item("Layout", Layout?.ToString()),
+                        new Item("BatchSize", BatchSize.ToString()),
+                        new Item("IncludeCallSite", IncludeCallSite.ToString()),
+                        new Item("IncludeCallSiteStackTrace", IncludeCallSiteStackTrace.ToString()),
+                        new Item("IncludeEventProperties", IncludeEventProperties.ToString()),
+                        new Item("IncludeGdc", IncludeGdc.ToString()),
+                        new Item("IncludeScopeNested", IncludeScopeNested.ToString()),
+                        new Item("IncludeScopeProperties", IncludeScopeProperties.ToString()),
+                        new Item("Name", Name),
+                        new Item("QueueLimit", QueueLimit.ToString()),
+                        new Item("RetryCount", RetryCount.ToString()),
+                        new Item("RetryDelayMilliseconds", RetryDelayMilliseconds.ToString()),
+                        new Item("TaskDelayMilliseconds", TaskDelayMilliseconds.ToString()),
+                        new Item("TaskTimeoutSeconds", TaskTimeoutSeconds.ToString()),
+                    ],
+                    Assemblies =
+                    [
+                        new AssemblyInfo { Name = "Elmah.Io.NLog", Version = _assemblyVersion, },
+                        new AssemblyInfo { Name = "Elmah.Io.Client", Version = _elmahIoClientVersion, },
+                        new AssemblyInfo { Name = "NLog", Version = _nlogAssemblyVersion, }
+                    ],
+                    ConfigFiles = [],
+                };
+
+                var installation = new CreateInstallation
+                {
+                    Type = ApplicationInfoHelper.GetApplicationType(),
+                    Name = GlobalDiagnosticsContext.Get("application"),
+                    Loggers = [logger]
+                };
+
+#if NETSTANDARD
+                var location = typeof(ElmahIoTarget).GetTypeInfo().Assembly.ToString();
+#else
+                var location = typeof(ElmahIoTarget).Assembly.Location;
+#endif
+                var currentDirectory = Path.GetDirectoryName(location);
+
+                var configFilePath = Path.Combine(currentDirectory, "nlog.config");
+                var appsettingsFilePath = Path.Combine(currentDirectory, "appsettings.json");
+                if (File.Exists(configFilePath))
+                {
+                    logger.ConfigFiles.Add(new ConfigFile
+                    {
+                        Name = Path.GetFileName(configFilePath),
+                        Content = File.ReadAllText(configFilePath),
+                        ContentType = "text/xml",
+                    });
+                }
+                else if (File.Exists(appsettingsFilePath))
+                {
+                    var appsettingsContent = File.ReadAllText(appsettingsFilePath);
+                    var appsettingsObject = JObject.Parse(appsettingsContent);
+                    if (appsettingsObject.TryGetValue("NLog", out JToken nlogSection))
+                    {
+                        logger.ConfigFiles.Add(new ConfigFile
+                        {
+                            Name = Path.GetFileName(appsettingsFilePath),
+                            Content = nlogSection.ToString(),
+                            ContentType = "application/json"
+                        });
+                    }
+                }
+
+                foreach (var name in GlobalDiagnosticsContext.GetNames().Where(n => !n.Equals("application", StringComparison.OrdinalIgnoreCase)))
+                {
+                    logger.Properties.Add(new Item(name, GlobalDiagnosticsContext.Get(name)));
+                }
+
+                _client.Installations.Create(_logId.ToString(), installation);
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Error(ex, "ElmahIoTarget(Name={0}): Error - {1}", Name, ex.Message);
+            }
         }
     }
 }

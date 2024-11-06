@@ -229,7 +229,7 @@ namespace Elmah.Io.NLog
             return layout;
         }
 
-        private void TrySetLayout(Action<Layout> layout, string value, string fallback)
+        private static void TrySetLayout(Action<Layout> layout, string value, string fallback)
         {
             try
             {
@@ -314,7 +314,7 @@ namespace Elmah.Io.NLog
                     return _client.Messages.CreateAndNotifyAsync(_logId, message, cancellationToken);
                 }
 
-                messages = messages ?? new List<CreateMessage>(logEvents.Count);
+                messages ??= new List<CreateMessage>(logEvents.Count);
                 messages.Add(message);
             }
 
@@ -353,12 +353,12 @@ namespace Elmah.Io.NLog
         private IList<Item> RenderItems(LogEventInfo logEvent, Layout layout)
         {
             var rendered = RenderLogEvent(layout, logEvent);
-            if (string.IsNullOrWhiteSpace(rendered)) return new List<Item>();
+            if (string.IsNullOrWhiteSpace(rendered)) return [];
             var items = new List<Item>();
             if (rendered.StartsWith("[{") && rendered.EndsWith("}]")) // JSON rendered using a NLog ASP.NET layout renderer
             {
                 var renderedJson = JsonConvert.DeserializeObject<JArray>(rendered);
-                foreach (JObject item in renderedJson)
+                foreach (JObject item in renderedJson.Cast<JObject>())
                 {
                     foreach (var property in item)
                     {
@@ -403,7 +403,7 @@ namespace Elmah.Io.NLog
 
             var properties = GetAllProperties(logEvent);
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             var valueFormatter = ResolveService<IValueFormatter>();
             foreach (var obj in properties)
             {
@@ -427,7 +427,7 @@ namespace Elmah.Io.NLog
             return items;
         }
 
-        private string LevelToSeverity(LogLevel level)
+        private static string LevelToSeverity(LogLevel level)
         {
             if (level == LogLevel.Debug) return nameof(Severity.Debug);
             if (level == LogLevel.Error) return nameof(Severity.Error);

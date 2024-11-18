@@ -380,9 +380,9 @@ namespace Elmah.Io.NLog
             }
             else // User sended something with the right name as part of structured logging or custom properties
             {
-                foreach (var keyAndValue in rendered.Split(new[] { "\", \"" }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var keyAndValue in rendered.Split(["\", \""], StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var keyAndValueSplit = keyAndValue.Split(new[] { "\"=\"" }, StringSplitOptions.None);
+                    var keyAndValueSplit = keyAndValue.Split(["\"=\""], StringSplitOptions.None);
                     if (keyAndValueSplit.Length <= 0) continue;
                     var key = keyAndValueSplit[0]?.TrimStart('\"').TrimEnd('\"');
                     if (string.IsNullOrWhiteSpace(key)) continue;

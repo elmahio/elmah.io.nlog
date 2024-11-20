@@ -515,7 +515,7 @@ namespace Elmah.Io.NLog
                     {
                         Name = Path.GetFileName(configFilePath),
                         Content = File.ReadAllText(configFilePath),
-                        ContentType = "text/xml",
+                        ContentType = "application/xml",
                     });
                 }
                 else if (File.Exists(appsettingsFilePath))

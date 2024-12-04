@@ -11,11 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A7B5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog", "src\Elmah.Io.NLog\Elmah.Io.NLog.csproj", "{E2EB3B81-26C1-4415-90CE-3204BCEED5E7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2D2A563-08A0-4B2A-9D31-820045C2357B}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.Tests", "test\Elmah.Io.NLog.Tests\Elmah.Io.NLog.Tests.csproj", "{A7E2930B-EC84-4AB2-BCC4-0B90B6BBDCBA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elmah.Io.NLog.AspNetCore60", "samples\Elmah.Io.NLog.AspNetCore60\Elmah.Io.NLog.AspNetCore60.csproj", "{43DDB13A-9FD3-4728-BA4A-47A0DC09BA49}"

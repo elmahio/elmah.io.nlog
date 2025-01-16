@@ -147,6 +147,7 @@ namespace Elmah.Io.NLog
             TaskDelayMilliseconds = 250;// Delay to optimize for bulk send (reduce http requests)
             TaskTimeoutSeconds = 150;   // Long timeout to allow http request to complete before starting next task
             RetryCount = 0;             // Skip retry on error / timeout
+            RetryDelayMilliseconds = 50;// Reduce sleep after error to 50ms
             BatchSize = 50;             // Avoid too many messages in a single batch (reduce request size)
         }
 
@@ -263,7 +264,7 @@ namespace Elmah.Io.NLog
             for (int i = 0; i < logEvents.Count; ++i)
             {
                 var logEvent = logEvents[i];
-                var title = _usingDefaultLayout ? logEvent.FormattedMessage : Layout.Render(logEvent);
+                var title = _usingDefaultLayout ? logEvent.FormattedMessage : RenderLogEvent(Layout, logEvent);
 
                 var message = new CreateMessage
                 {
@@ -403,15 +404,15 @@ namespace Elmah.Io.NLog
             return result;
         }
 
-        private List<Item> PropertiesToData(LogEventInfo logEvent)
+        private IList<Item> PropertiesToData(LogEventInfo logEvent)
         {
+            if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0 && logEvent.Exception is null) return [];
+
             var items = new List<Item>();
             if (logEvent.Exception != null)
             {
                 items.AddRange(logEvent.Exception.ToDataList());
             }
-
-            if (!ShouldIncludeProperties(logEvent) && ContextProperties.Count == 0) return items;
 
             var properties = GetAllProperties(logEvent);
 

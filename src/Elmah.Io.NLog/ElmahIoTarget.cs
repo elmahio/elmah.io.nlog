@@ -101,6 +101,12 @@ namespace Elmah.Io.NLog
         /// </summary>
         public Func<CreateMessage, bool> OnFilter { get; set; }
 
+        /// <summary>
+        /// Register an action to be called before creating an installation. Use the OnInstallation
+        /// action to decorate installations with additional information related to your environment.
+        /// </summary>
+        public Action<CreateInstallation> OnInstallation { get; set; }
+
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
         public IWebProxy WebProxy { get; set; }
@@ -547,7 +553,9 @@ namespace Elmah.Io.NLog
                 EnvironmentVariablesHelper.GetAzureEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
                 EnvironmentVariablesHelper.GetAzureFunctionsEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
 
-                _client.Installations.Create(_logId.ToString(), installation);
+                OnInstallation?.Invoke(installation);
+
+                _client.Installations.CreateAndNotify(_logId, installation);
             }
             catch (Exception ex)
             {

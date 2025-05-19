@@ -1,3 +1,4 @@
+#pragma warning disable S125 // Sections of code should not be commented out
 using NLog;
 using NLog.Web;
 
@@ -39,7 +40,7 @@ try
     app.MapRazorPages()
        .WithStaticAssets();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception e)
 {
@@ -50,3 +51,4 @@ finally
     // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     LogManager.Shutdown();
 }
+#pragma warning restore S125 // Sections of code should not be commented out

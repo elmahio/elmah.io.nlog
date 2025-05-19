@@ -492,6 +492,7 @@ namespace Elmah.Io.NLog
                         new AssemblyInfo { Name = "NLog", Version = _nlogAssemblyVersion, }
                     ],
                     ConfigFiles = [],
+                    EnvironmentVariables = [],
                 };
 
                 var installation = new CreateInstallation
@@ -538,6 +539,13 @@ namespace Elmah.Io.NLog
                 {
                     logger.Properties.Add(new Item(name, GlobalDiagnosticsContext.Get(name)));
                 }
+
+                // Include environment variables from all possible sources since we don't know in which context NLog is being executed.
+                EnvironmentVariablesHelper.GetElmahIoAppSettingsEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
+                EnvironmentVariablesHelper.GetAspNetCoreEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
+                EnvironmentVariablesHelper.GetDotNetEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
+                EnvironmentVariablesHelper.GetAzureEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
+                EnvironmentVariablesHelper.GetAzureFunctionsEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
 
                 _client.Installations.Create(_logId.ToString(), installation);
             }

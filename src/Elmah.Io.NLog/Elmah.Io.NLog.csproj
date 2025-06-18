@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>elmah.io target for NLog</Description>
     <Authors>elmah.io</Authors>
-    <TargetFrameworks>net45;netstandard1.4;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net45;net461;netstandard1.4;netstandard2.0</TargetFrameworks>
     <AssemblyName>Elmah.Io.NLog</AssemblyName>
     <PackageId>Elmah.Io.NLog</PackageId>
     <PackageTags>Error;Exception;Reporting;Management;Logging;ELMAH;Diagnostics;Tracing;NLog</PackageTags>
@@ -16,7 +16,7 @@
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <DisableImplicitFrameworkReferences Condition=" '$(TargetFramework)' == 'net45' ">true</DisableImplicitFrameworkReferences>
+    <DisableImplicitFrameworkReferences Condition=" $(TargetFramework.StartsWith('net4')) ">true</DisableImplicitFrameworkReferences>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <EnablePackageValidation>true</EnablePackageValidation>
@@ -35,7 +35,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>

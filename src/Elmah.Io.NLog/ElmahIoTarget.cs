@@ -256,9 +256,10 @@ namespace Elmah.Io.NLog
         }
 
         /// <inheritdoc/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "EX019:NotImplementedException left in code", Justification = "<Pending>")]
         protected override Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException(); // Never reached, because of override of IList-handler
+            throw new NotImplementedException("Never reached, because of override of IList-handler");
         }
 
         /// <inheritdoc/>

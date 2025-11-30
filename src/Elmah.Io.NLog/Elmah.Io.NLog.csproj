@@ -3,11 +3,10 @@
   <PropertyGroup>
     <Description>elmah.io target for NLog</Description>
     <Authors>elmah.io</Authors>
-    <TargetFrameworks>net45;net461;netstandard1.4;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard2.0</TargetFrameworks>
     <AssemblyName>Elmah.Io.NLog</AssemblyName>
     <PackageId>Elmah.Io.NLog</PackageId>
     <PackageTags>Error;Exception;Reporting;Management;Logging;ELMAH;Diagnostics;Tracing;NLog</PackageTags>
-    <PackageIconUrl>https://secure.gravatar.com/avatar/5c4cb3646528821117abde6d2d5ee22d?s=64</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://elmah.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/elmahio/elmah.io.nlog</RepositoryUrl>
@@ -20,7 +19,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <!-- SourceLink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -41,8 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.2.2" />
-    <PackageReference Include="Elmah.Io.Client" Version="[5.3.131,6)" />
+    <PackageReference Include="NLog" Version="5.5.1" />
+    <PackageReference Include="Elmah.Io.Client" Version="[6.0.133-pre,7)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,10 +15,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace Elmah.Io.NLog
 {
@@ -32,20 +31,20 @@ namespace Elmah.Io.NLog
     public class ElmahIoTarget : AsyncTaskTarget
     {
 #if NETSTANDARD
-        private static readonly string _assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-        private static readonly string _elmahIoClientVersion = typeof(IElmahioAPI).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-        private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string assemblyVersion = typeof(ElmahIoTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string elmahIoClientVersion = typeof(IElmahioAPI).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+        private static readonly string nlogAssemblyVersion = typeof(AsyncTaskTarget).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 #else
-        private static readonly string _assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
-        private static readonly string _elmahIoClientVersion = typeof(IElmahioAPI).Assembly.GetName().Version.ToString();
-        private static readonly string _nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
+        private static readonly string assemblyVersion = typeof(ElmahIoTarget).Assembly.GetName().Version.ToString();
+        private static readonly string elmahIoClientVersion = typeof(IElmahioAPI).Assembly.GetName().Version.ToString();
+        private static readonly string nlogAssemblyVersion = typeof(AsyncTaskTarget).Assembly.GetName().Version.ToString();
 #endif
 
-        private IElmahioAPI _client;
+        private IElmahioAPI client;
         private readonly string DefaultLayout;
-        private bool _usingDefaultLayout;
-        private Guid _logId;
-        private string _apiKey;
+        private bool usingDefaultLayout;
+        private Guid logId;
+        private string apiKey;
 
         /// <summary>
         /// The API key from the elmah.io UI.
@@ -55,12 +54,12 @@ namespace Elmah.Io.NLog
         {
             get
             {
-                return _apiKey;
+                return apiKey;
             }
             set
             {
-                var apiKey = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
-                _apiKey = apiKey;
+                var renderedApiKey = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
+                apiKey = renderedApiKey;
             }
         }
 
@@ -74,12 +73,12 @@ namespace Elmah.Io.NLog
         {
             get
             {
-                return _logId != Guid.Empty ? _logId.ToString() : null;
+                return logId != Guid.Empty ? logId.ToString() : null;
             }
             set
             {
-                var logId = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
-                _logId = Guid.Parse(logId);
+                var renderedLogId = RenderLogEvent(value, LogEventInfo.CreateNullEvent());
+                logId = Guid.Parse(renderedLogId);
             }
         }
 
@@ -163,13 +162,13 @@ namespace Elmah.Io.NLog
         /// </summary>
         public ElmahIoTarget(IElmahioAPI client) : this()
         {
-            _client = client;
+            this.client = client;
         }
 
         /// <inheritdoc/>
         protected override void InitializeTarget()
         {
-            _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
+            usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
 
             TrySetLayout(
                 v => HostnameLayout = v,
@@ -194,17 +193,10 @@ namespace Elmah.Io.NLog
             SourceLayout = ToLayout("event-properties:source", "scopeproperty:source", "gdc:source");
             CategoryLayout = ToLayout("event-properties:category", "scopeproperty:category", "gdc:category", "logger");
             ApplicationLayout = ToLayout("event-properties:application", "scopeproperty:application", "gdc:application");
-#if NET45
-            TrySetLayout(
-                v => UserLayout = v,
-                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "aspnet-user-identity", "identity:authType=false:isAuthenticated=false"),
-                ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "identity:authType=false:isAuthenticated=false"));
-#else
             TrySetLayout(
                 v => UserLayout = v,
                 ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "aspnet-user-identity", "environment-user"),
                 ToLayout("event-properties:user", "scopeproperty:user", "gdc:user", "environment-user"));
-#endif
             TrySetLayout(
                 v => MethodLayout = v,
                 ToLayout("event-properties:method", "scopeproperty:method", "gdc:method", "aspnet-request-method"),
@@ -271,7 +263,7 @@ namespace Elmah.Io.NLog
             for (int i = 0; i < logEvents.Count; ++i)
             {
                 var logEvent = logEvents[i];
-                var title = _usingDefaultLayout ? logEvent.FormattedMessage : RenderLogEvent(Layout, logEvent);
+                var title = usingDefaultLayout ? logEvent.FormattedMessage : RenderLogEvent(Layout, logEvent);
 
                 var message = new CreateMessage
                 {
@@ -300,7 +292,7 @@ namespace Elmah.Io.NLog
 
                 if (logEvents.Count == 1)
                 {
-                    return _client.Messages.CreateAndNotifyAsync(_logId, message, cancellationToken);
+                    return client.Messages.CreateAndNotifyAsync(logId, message, cancellationToken);
                 }
 
                 messages ??= new List<CreateMessage>(logEvents.Count);
@@ -309,7 +301,7 @@ namespace Elmah.Io.NLog
 
             if (messages?.Count > 0)
             {
-                return _client.Messages.CreateBulkAndNotifyAsync(_logId, messages, cancellationToken);
+                return client.Messages.CreateBulkAndNotifyAsync(logId, messages, cancellationToken);
             }
 
             return Task.FromResult<Message>(null);
@@ -317,7 +309,7 @@ namespace Elmah.Io.NLog
 
         private void EnsureClient()
         {
-            if (_client == null)
+            if (client == null)
             {
                 var api = ElmahioAPI.Create(ApiKey, new ElmahIoOptions
                 {
@@ -342,7 +334,7 @@ namespace Elmah.Io.NLog
                     InternalLogger.Error(args.Error, "ElmahIoTarget(Name={0}): Error - {1}", Name, args.Message);
                     OnError?.Invoke(args.Message, args.Error);
                 };
-                _client = api;
+                client = api;
             }
         }
 
@@ -375,14 +367,15 @@ namespace Elmah.Io.NLog
             var rendered = RenderLogEvent(layout, logEvent);
             if (string.IsNullOrWhiteSpace(rendered)) return [];
             var items = new List<Item>();
-            if (rendered.StartsWith("[{") && rendered.EndsWith("}]")) // JSON rendered using a NLog ASP.NET layout renderer
+            if (rendered.StartsWith("[{") && rendered.EndsWith("}]"))
             {
-                var renderedJson = JsonConvert.DeserializeObject<JArray>(rendered);
-                foreach (JObject item in renderedJson.Cast<JObject>())
+                using var doc = JsonDocument.Parse(rendered);
+
+                foreach (var item in doc.RootElement.EnumerateArray())
                 {
-                    foreach (var property in item)
+                    foreach (var property in item.EnumerateObject())
                     {
-                        items.Add(new Item(property.Key, property.Value?.ToString()));
+                        items.Add(new Item(property.Name, property.Value.ToString()));
                     }
                 }
             }
@@ -460,9 +453,9 @@ namespace Elmah.Io.NLog
         private static string UserAgent()
         {
             return new StringBuilder()
-                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", _assemblyVersion)).ToString())
+                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("Elmah.Io.NLog", assemblyVersion)).ToString())
                 .Append(" ")
-                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", _nlogAssemblyVersion)).ToString())
+                .Append(new ProductInfoHeaderValue(new ProductHeaderValue("NLog", nlogAssemblyVersion)).ToString())
                 .ToString();
         }
 
@@ -494,9 +487,9 @@ namespace Elmah.Io.NLog
                     ],
                     Assemblies =
                     [
-                        new AssemblyInfo { Name = "Elmah.Io.NLog", Version = _assemblyVersion, },
-                        new AssemblyInfo { Name = "Elmah.Io.Client", Version = _elmahIoClientVersion, },
-                        new AssemblyInfo { Name = "NLog", Version = _nlogAssemblyVersion, }
+                        new AssemblyInfo { Name = "Elmah.Io.NLog", Version = assemblyVersion, },
+                        new AssemblyInfo { Name = "Elmah.Io.Client", Version = elmahIoClientVersion, },
+                        new AssemblyInfo { Name = "NLog", Version = nlogAssemblyVersion, }
                     ],
                     ConfigFiles = [],
                     EnvironmentVariables = [],
@@ -530,13 +523,14 @@ namespace Elmah.Io.NLog
                 else if (File.Exists(appsettingsFilePath))
                 {
                     var appsettingsContent = File.ReadAllText(appsettingsFilePath);
-                    var appsettingsObject = JObject.Parse(appsettingsContent);
-                    if (appsettingsObject.TryGetValue("NLog", out JToken nlogSection))
+                    using var doc = JsonDocument.Parse(appsettingsContent);
+
+                    if (doc.RootElement.TryGetProperty("NLog", out var nlogSection))
                     {
                         logger.ConfigFiles.Add(new ConfigFile
                         {
                             Name = Path.GetFileName(appsettingsFilePath),
-                            Content = nlogSection.ToString(),
+                            Content = nlogSection.GetRawText(),
                             ContentType = "application/json"
                         });
                     }
@@ -556,7 +550,7 @@ namespace Elmah.Io.NLog
 
                 OnInstallation?.Invoke(installation);
 
-                _client.Installations.CreateAndNotify(_logId, installation);
+                client.Installations.CreateAndNotify(logId, installation);
             }
             catch (Exception ex)
             {

@@ -171,6 +171,16 @@ namespace Elmah.Io.NLog
         {
             _usingDefaultLayout = Layout == null || Layout.ToString() == DefaultLayout;
 
+            if (string.IsNullOrEmpty(ApiKey))
+            {
+                throw new NLogConfigurationException("ElmahIoTarget: ApiKey must be specified.");
+            }
+
+            if (string.IsNullOrEmpty(LogId))
+            {
+                throw new NLogConfigurationException("ElmahIoTarget: LogId must be specified.");
+            }
+
             TrySetLayout(
                 v => HostnameLayout = v,
                 ToLayout("event-properties:hostname", "scopeproperty:hostname", "gdc:hostname", "aspnet-request-host", "machinename"),
@@ -390,12 +400,11 @@ namespace Elmah.Io.NLog
             {
                 foreach (var keyAndValue in rendered.Split(["\", \""], StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var keyAndValueSplit = keyAndValue.Split(["\"=\""], StringSplitOptions.None);
-                    if (keyAndValueSplit.Length <= 0) continue;
-                    var key = keyAndValueSplit[0]?.TrimStart('\"').TrimEnd('\"');
+                    var keyValueSplitter = keyAndValue.IndexOf('=');
+                    if (keyValueSplitter <= 0) continue;
+                    var key = keyAndValue.Substring(0, keyValueSplitter).TrimStart('\"').TrimEnd('\"');
                     if (string.IsNullOrWhiteSpace(key)) continue;
-                    string value = null;
-                    if (keyAndValueSplit.Length > 1) value = keyAndValueSplit[1].TrimStart('\"').TrimEnd('\"');
+                    string value = keyAndValue.Substring(keyValueSplitter + 1).TrimStart('\"').TrimEnd('\"');
                     items.Add(new Item(key, value));
                 }
             }
@@ -422,22 +431,31 @@ namespace Elmah.Io.NLog
             }
 
             var properties = GetAllProperties(logEvent);
-
-            var sb = new StringBuilder();
-            var valueFormatter = ResolveService<IValueFormatter>();
-            foreach (var obj in properties)
+            if (properties.Count > 0)
             {
-                if (obj.Value != null)
+                StringBuilder sb = null;
+                IValueFormatter valueFormatter = null;
+                foreach (var obj in properties)
                 {
+                    var propertyValue = obj.Value;
+                    if (propertyValue is null)
+                        continue;
+
                     string text;
-                    if (obj.Value is string value)
+                    if (propertyValue is string value)
                     {
                         text = value;
                     }
+                    else if (propertyValue is IFormattable formattable)
+                    {
+                        text = formattable.ToString(null, null);
+                    }
                     else
                     {
+                        valueFormatter ??= ResolveService<IValueFormatter>();
+                        sb ??= new StringBuilder();
                         sb.Length = 0;  // Reuse StringBuilder
-                        valueFormatter.FormatValue(obj.Value, null, CaptureType.Normal, null, sb);
+                        valueFormatter.FormatValue(propertyValue, null, CaptureType.Normal, null, sb);
                         text = sb.ToString();
                     }
                     items.Add(new Item { Key = obj.Key, Value = text });

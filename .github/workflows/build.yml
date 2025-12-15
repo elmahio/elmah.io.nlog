@@ -56,7 +56,9 @@ jobs:
       run: dotnet-validate package local src/Elmah.Io.NLog/bin/Release/Elmah.Io.NLog.6.0.${{ github.run_number }}-pre.nupkg
 
     - name: Push
-      run: dotnet nuget push src/Elmah.Io.NLog/bin/Release/Elmah.Io.NLog.6.0.${{ github.run_number }}-pre.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push src/Elmah.Io.NLog/bin/Release/Elmah.Io.NLog.6.0.${{ github.run_number }}-pre.nupkg --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
       if: ${{ github.event_name == 'push' }}
 
     - name: Refresh Bugster

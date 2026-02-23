@@ -395,15 +395,17 @@ namespace Elmah.Io.NLog
                 {
                     var keyValueSplitter = keyAndValue.IndexOf('=');
                     if (keyValueSplitter <= 0) continue;
-                    var key = keyAndValue.Substring(0, keyValueSplitter).TrimStart('\"').TrimEnd('\"');
+                    var key = keyAndValue.Substring(0, keyValueSplitter).Trim(TrimQuotes);
                     if (string.IsNullOrWhiteSpace(key)) continue;
-                    string value = keyAndValue.Substring(keyValueSplitter + 1).TrimStart('\"').TrimEnd('\"');
+                    string value = keyAndValue.Substring(keyValueSplitter + 1).Trim(TrimQuotes);
                     items.Add(new Item(key, value));
                 }
             }
 
             return items;
         }
+
+        private static readonly char[] TrimQuotes = new[] { '\"' };
 
         private int? StatusCode(LogEventInfo logEvent)
         {

@@ -513,6 +513,7 @@ namespace Elmah.Io.NLog
                     ],
                     ConfigFiles = [],
                     EnvironmentVariables = [],
+                    Recommendations = [],
                 };
 
                 var installation = new CreateInstallation
@@ -568,6 +569,8 @@ namespace Elmah.Io.NLog
                 EnvironmentVariablesHelper.GetAzureEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
                 EnvironmentVariablesHelper.GetAzureFunctionsEnvironmentVariables().ForEach(v => logger.EnvironmentVariables.Add(v));
 
+                AddRecommendations(logger);
+
                 OnInstallation?.Invoke(installation);
 
                 client.Installations.CreateAndNotify(logId, installation);
@@ -575,6 +578,23 @@ namespace Elmah.Io.NLog
             catch (Exception ex)
             {
                 InternalLogger.Error(ex, "ElmahIoTarget(Name={0}): Error - {1}", Name, ex.Message);
+            }
+        }
+
+        private void AddRecommendations(LoggerInfo logger)
+        {
+            if (!usingDefaultLayout)
+            {
+                logger.Recommendations.Add(new Recommendation
+                {
+                    Impact = "Low",
+                    State = "Open",
+                    Type = "NLogAvoidCustomLayout",
+                    Properties =
+                    [
+                        new Item("layout", Layout?.ToString())
+                    ]
+                });
             }
         }
     }

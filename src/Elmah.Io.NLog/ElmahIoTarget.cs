@@ -49,7 +49,6 @@ namespace Elmah.Io.NLog
         /// <summary>
         /// The API key from the elmah.io UI.
         /// </summary>
-        [RequiredParameter]
         public string ApiKey
         {
             get
@@ -68,7 +67,6 @@ namespace Elmah.Io.NLog
         /// <summary>
         /// The id of the log to send messages to.
         /// </summary>
-        [RequiredParameter]
         public string LogId
         {
             get
